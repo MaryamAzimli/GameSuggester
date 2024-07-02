@@ -26,7 +26,7 @@ export default profilePage;
 const styles = StyleSheet.create({
   headerImage: {
     color: "#808080",
-    bottom: -90,
+    bottom: -80,
     left: -35,
     position: "absolute",
   },
