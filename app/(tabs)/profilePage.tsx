@@ -5,33 +5,47 @@ import { View, Text } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
+import octopusImage from "@/assets/images/octopus.png";
 
-const profilePage = () => {
+const ProfilePage = () => {
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
       headerImage={
-        <FontAwesome5 size={310} name="user-alt" style={styles.headerImage} />
+        <View style={styles.headerContainer}>
+          <Image source={octopusImage} style={styles.profileImage} />
+          <ThemedText type="title">Octo the Gamer</ThemedText>
+        </View>
       }
     >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Profile Page</ThemedText>
-      </ThemedView>
+      <ThemedView style={styles.titleContainer}></ThemedView>
     </ParallaxScrollView>
   );
 };
 
-export default profilePage;
+export default ProfilePage;
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: "#808080",
-    bottom: -80,
-    left: -35,
-    position: "absolute",
+  headerContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    height: 310,
+    backgroundColor: "#353636",
+  },
+  profileImage: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    borderColor: "#808080",
+    borderWidth: 2,
   },
   titleContainer: {
-    flexDirection: "row",
-    gap: 8,
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100%",
+  },
+  titleText: {
+    textAlign: "center",
   },
 });
