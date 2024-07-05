@@ -63,6 +63,10 @@ const ProfilePage = () => {
     navigation.navigate("profile/following");
   };
 
+  const handleListPress = (index) => {
+    navigation.navigate("profile/lists", { listName: lists[index].name });
+  };
+
   const handleAddList = () => {
     if (listName.trim()) {
       const isDuplicate = lists.some(
@@ -132,7 +136,11 @@ const ProfilePage = () => {
         <View style={styles.contentContainer}>
           <ScrollView>
             {lists.map((list, index) => (
-              <View key={index} style={styles.listItem}>
+              <TouchableOpacity
+                key={index}
+                style={styles.listItem}
+                onPress={() => handleListPress(index)}
+              >
                 <Image source={octopusImage} style={styles.listImage} />
                 <View>
                   <ThemedText style={styles.listTitle}>{list.name}</ThemedText>
@@ -151,7 +159,7 @@ const ProfilePage = () => {
                     <Feather name="trash" size={18} color="white" />
                   </TouchableOpacity>
                 </View>
-              </View>
+              </TouchableOpacity>
             ))}
           </ScrollView>
         </View>
