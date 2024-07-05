@@ -16,7 +16,7 @@ import { useNavigation } from "@react-navigation/native";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
-import octopusImage from "@/assets/images/octopus.png";
+import octopusImage from "@/assets/defaultProfiles/octopus.png";
 import { Feather } from "@expo/vector-icons";
 import { useMediaQuery } from "react-responsive";
 import { Ionicons } from "@expo/vector-icons";
@@ -28,7 +28,6 @@ const ProfilePage = () => {
   const [lists, setLists] = useState([
     { name: "Shooters", games: 14, time: "1w" },
   ]);
-
   const navigation = useNavigation();
   const isMobile = useMediaQuery({ maxWidth: 767 });
   const isWeb = useMediaQuery({ minWidth: 768 });
@@ -36,6 +35,8 @@ const ProfilePage = () => {
   const [currentEditListIndex, setCurrentEditListIndex] = useState(null);
   const [editListName, setEditListName] = useState("");
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteListIndex, setDeleteListIndex] = useState(null);
 
   const handleBellPress = () => {
     setNotificationsEnabled(!notificationsEnabled);
@@ -51,12 +52,30 @@ const ProfilePage = () => {
   };
 
   const handleSettingsPress = () => {
-    // Navigate to Settings screen
-    navigation.navigate("inPages/settings");
+    navigation.navigate("profile/settings");
+  };
+
+  const handleFollowersPress = () => {
+    navigation.navigate("profile/followers");
+  };
+
+  const handleFollowingPress = () => {
+    navigation.navigate("profile/following");
   };
 
   const handleAddList = () => {
     if (listName.trim()) {
+      const isDuplicate = lists.some(
+        (list) => list.name.toLowerCase() === listName.toLowerCase()
+      );
+      if (isDuplicate) {
+        if (Platform.OS === "web") {
+          window.alert("Error, a list with this name already exists!");
+        } else {
+          Alert.alert("Error", "A list with this name already exists!");
+        }
+        return;
+      }
       setLists([...lists, { name: listName, games: 0, time: "now" }]);
       setListName("");
       setModalVisible(false);
@@ -64,9 +83,15 @@ const ProfilePage = () => {
   };
 
   const handleDeleteList = (index) => {
+    setDeleteListIndex(index);
+    setDeleteModalVisible(true);
+  };
+
+  const confirmDeleteList = () => {
     const newList = [...lists];
-    newList.splice(index, 1);
+    newList.splice(deleteListIndex, 1);
     setLists(newList);
+    setDeleteModalVisible(false);
   };
 
   const handleEditList = (index) => {
@@ -76,6 +101,19 @@ const ProfilePage = () => {
   };
 
   const handleUpdateListName = () => {
+    const isDuplicate = lists.some(
+      (list, index) =>
+        list.name.toLowerCase() === editListName.toLowerCase() &&
+        index !== currentEditListIndex
+    );
+    if (isDuplicate) {
+      if (Platform.OS === "web") {
+        window.alert("Error, a list with this name already exists!");
+      } else {
+        Alert.alert("Error", "A list with this name already exists!");
+      }
+      return;
+    }
     const updatedLists = [...lists];
     updatedLists[currentEditListIndex].name = editListName;
     setLists(updatedLists);
@@ -164,18 +202,25 @@ const ProfilePage = () => {
               />
             </TouchableOpacity>
           </View>
-
-          <Image source={octopusImage} style={styles.profileImage} />
+          <TouchableOpacity>
+            <Image source={octopusImage} style={styles.profileImage} />
+          </TouchableOpacity>
           <ThemedText type="title">Octo the Gamer</ThemedText>
           <View style={styles.statsContainer}>
-            <View style={styles.statItem}>
+            <TouchableOpacity
+              style={styles.statItem}
+              onPress={handleFollowersPress}
+            >
               <ThemedText style={styles.statNumber}>87.8K</ThemedText>
               <ThemedText style={styles.statLabel}>Followers</ThemedText>
-            </View>
-            <View style={styles.statItem}>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.statItem}
+              onPress={handleFollowingPress}
+            >
               <ThemedText style={styles.statNumber}>526</ThemedText>
               <ThemedText style={styles.statLabel}>Following</ThemedText>
-            </View>
+            </TouchableOpacity>
           </View>
         </ThemedView>
       }
@@ -286,6 +331,37 @@ const ProfilePage = () => {
           </View>
         </View>
       </Modal>
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={deleteModalVisible}
+        onRequestClose={() => setDeleteModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Delete List</Text>
+            <Text style={styles.modalText}>
+              Are you sure you want to delete '{lists[deleteListIndex]?.name}'?
+            </Text>
+            <View style={styles.buttonContainer}>
+              <View style={styles.button}>
+                <Button
+                  title="Yes"
+                  onPress={confirmDeleteList}
+                  color="#FFA500"
+                />
+              </View>
+              <View style={styles.button}>
+                <Button
+                  title="No"
+                  onPress={() => setDeleteModalVisible(false)}
+                  color="#FFA500"
+                />
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ParallaxScrollView>
   );
 };
@@ -362,6 +438,7 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 16,
+    color: "#FFFFFF",
   },
   selectedTabText: {
     color: "#FFA500",
@@ -379,6 +456,7 @@ const styles = StyleSheet.create({
   },
   tabContentText: {
     fontSize: 20,
+    color: "#FFFFFF",
   },
   listItem: {
     flexDirection: "row",
@@ -430,6 +508,11 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     color: "white",
+    marginBottom: 20,
+  },
+  modalText: {
+    fontSize: 16,
+    color: "#FFFFFF",
     marginBottom: 20,
   },
   textInput: {
