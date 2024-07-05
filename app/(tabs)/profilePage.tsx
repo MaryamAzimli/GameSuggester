@@ -16,10 +16,20 @@ import { useNavigation } from "@react-navigation/native";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
-import octopusImage from "@/assets/defaultProfiles/octopus.png";
 import { Feather } from "@expo/vector-icons";
 import { useMediaQuery } from "react-responsive";
 import { Ionicons } from "@expo/vector-icons";
+import alien from "@/assets/defaultProfiles/alien.png";
+import astronout from "@/assets/defaultProfiles/astronout.png";
+import criminal from "@/assets/defaultProfiles/criminal.png";
+import elf from "@/assets/defaultProfiles/elf.png";
+import gamerGirl from "@/assets/defaultProfiles/gamerGirl.png";
+import guyRegular from "@/assets/defaultProfiles/guyRegular.png";
+import mage from "@/assets/defaultProfiles/mage.png";
+import monster from "@/assets/defaultProfiles/monster.png";
+import ninja from "@/assets/defaultProfiles/ninja.png";
+import pirate from "@/assets/defaultProfiles/pirate.png";
+import superHero from "@/assets/defaultProfiles/superHero.png";
 
 const ProfilePage = () => {
   const [selectedTab, setSelectedTab] = useState("Games");
@@ -37,6 +47,17 @@ const ProfilePage = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteListIndex, setDeleteListIndex] = useState(null);
+  const [profilePicModalVisible, setProfilePicModalVisible] = useState(false);
+  const [selectedProfilePic, setSelectedProfilePic] = useState(elf);
+
+  const handleProfilePicPress = () => {
+    setProfilePicModalVisible(true);
+  };
+
+  const handleProfilePicSelect = (pic) => {
+    setSelectedProfilePic(pic);
+    setProfilePicModalVisible(false);
+  };
 
   const handleBellPress = () => {
     setNotificationsEnabled(!notificationsEnabled);
@@ -141,7 +162,7 @@ const ProfilePage = () => {
                 style={styles.listItem}
                 onPress={() => handleListPress(index)}
               >
-                <Image source={octopusImage} style={styles.listImage} />
+                <Image source={elf} style={styles.listImage} />
                 <View>
                   <ThemedText style={styles.listTitle}>{list.name}</ThemedText>
                   <ThemedText style={styles.listSubtitle}>
@@ -210,9 +231,10 @@ const ProfilePage = () => {
               />
             </TouchableOpacity>
           </View>
-          <TouchableOpacity>
-            <Image source={octopusImage} style={styles.profileImage} />
+          <TouchableOpacity onPress={handleProfilePicPress}>
+            <Image source={selectedProfilePic} style={styles.profileImage} />
           </TouchableOpacity>
+
           <ThemedText type="title">Octo the Gamer</ThemedText>
           <View style={styles.statsContainer}>
             <TouchableOpacity
@@ -370,6 +392,86 @@ const ProfilePage = () => {
           </View>
         </View>
       </Modal>
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={profilePicModalVisible}
+        onRequestClose={() => {
+          setProfilePicModalVisible(!profilePicModalVisible);
+        }}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Select Profile Picture</Text>
+            <ScrollView contentContainerStyle={styles.profilePicContainer}>
+              <View style={styles.profilePicRow}>
+                <TouchableOpacity onPress={() => handleProfilePicSelect(elf)}>
+                  <Image source={elf} style={styles.profilePicImage} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => handleProfilePicSelect(alien)}>
+                  <Image source={alien} style={styles.profilePicImage} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleProfilePicSelect(astronout)}
+                >
+                  <Image source={astronout} style={styles.profilePicImage} />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.profilePicRow}>
+                <TouchableOpacity
+                  onPress={() => handleProfilePicSelect(criminal)}
+                >
+                  <Image source={criminal} style={styles.profilePicImage} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleProfilePicSelect(gamerGirl)}
+                >
+                  <Image source={gamerGirl} style={styles.profilePicImage} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleProfilePicSelect(guyRegular)}
+                >
+                  <Image source={guyRegular} style={styles.profilePicImage} />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.profilePicRow}>
+                <TouchableOpacity onPress={() => handleProfilePicSelect(mage)}>
+                  <Image source={mage} style={styles.profilePicImage} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleProfilePicSelect(monster)}
+                >
+                  <Image source={monster} style={styles.profilePicImage} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => handleProfilePicSelect(ninja)}>
+                  <Image source={ninja} style={styles.profilePicImage} />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.profilePicRow}>
+                <TouchableOpacity
+                  onPress={() => handleProfilePicSelect(pirate)}
+                >
+                  <Image source={pirate} style={styles.profilePicImage} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleProfilePicSelect(superHero)}
+                >
+                  <Image source={superHero} style={styles.profilePicImage} />
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+            <View style={styles.buttonContainer}>
+              <View style={styles.button}>
+                <Button
+                  title="Close"
+                  onPress={() => setProfilePicModalVisible(false)}
+                  color="#FFA500"
+                />
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ParallaxScrollView>
   );
 };
@@ -500,7 +602,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.8)",
   },
   modalContent: {
-    width: 300,
+    width: 400,
     padding: 20,
     backgroundColor: "#353636",
     borderRadius: 10,
@@ -536,5 +638,20 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     marginHorizontal: 5,
+  },
+  profilePicContainer: {
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  profilePicRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginVertical: 10,
+  },
+  profilePicImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    margin: 10,
   },
 });
