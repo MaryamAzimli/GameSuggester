@@ -9,7 +9,8 @@ import {
   Text,
   Button,
   TextInput,
-  ToastAndroid,
+  Alert,
+  Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
@@ -19,7 +20,6 @@ import octopusImage from "@/assets/images/octopus.png";
 import { Feather } from "@expo/vector-icons";
 import { useMediaQuery } from "react-responsive";
 import { Ionicons } from "@expo/vector-icons";
-import { Snackbar } from "react-native-paper";
 
 const ProfilePage = () => {
   const [selectedTab, setSelectedTab] = useState("Games");
@@ -36,17 +36,18 @@ const ProfilePage = () => {
   const [currentEditListIndex, setCurrentEditListIndex] = useState(null);
   const [editListName, setEditListName] = useState("");
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const handleBellPress = () => {
     setNotificationsEnabled(!notificationsEnabled);
-    setSnackbarMessage(
-      notificationsEnabled
-        ? "Notifications have been disabled"
-        : "Notifications have been enabled"
-    );
-    setSnackbarVisible(true);
+    const message = notificationsEnabled
+      ? "Notifications have been disabled"
+      : "Notifications have been enabled";
+
+    if (Platform.OS === "web") {
+      window.alert(message);
+    } else {
+      Alert.alert("Notifications", message);
+    }
   };
 
   const handleSettingsPress = () => {
@@ -285,16 +286,6 @@ const ProfilePage = () => {
           </View>
         </View>
       </Modal>
-      <View style={{ ...styles.snackbarContainer, zIndex: 1000 }}>
-        <Snackbar
-          visible={snackbarVisible}
-          onDismiss={() => setSnackbarVisible(false)}
-          duration={Snackbar.DURATION_SHORT}
-          style={styles.snackbar}
-        >
-          {snackbarMessage}
-        </Snackbar>
-      </View>
     </ParallaxScrollView>
   );
 };
@@ -371,7 +362,6 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 16,
-    color: "#FFFFFF",
   },
   selectedTabText: {
     color: "#FFA500",
@@ -389,7 +379,6 @@ const styles = StyleSheet.create({
   },
   tabContentText: {
     fontSize: 20,
-    color: "#FFFFFF",
   },
   listItem: {
     flexDirection: "row",
@@ -456,14 +445,5 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     marginHorizontal: 5,
-  },
-  snackbarContainer: {
-    position: "absolute",
-    bottom: 0,
-    width: "100%",
-    zIndex: 1000,
-  },
-  snackbar: {
-    backgroundColor: "#353636",
   },
 });
