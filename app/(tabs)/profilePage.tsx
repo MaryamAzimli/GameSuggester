@@ -16,7 +16,7 @@ import { useNavigation } from "@react-navigation/native";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
-import octopusImage from "@/assets/images/octopus.png";
+import octopusImage from "@/assets/defaultProfiles/octopus.png";
 import { Feather } from "@expo/vector-icons";
 import { useMediaQuery } from "react-responsive";
 import { Ionicons } from "@expo/vector-icons";
@@ -28,7 +28,6 @@ const ProfilePage = () => {
   const [lists, setLists] = useState([
     { name: "Shooters", games: 14, time: "1w" },
   ]);
-
   const navigation = useNavigation();
   const isMobile = useMediaQuery({ maxWidth: 767 });
   const isWeb = useMediaQuery({ minWidth: 768 });
@@ -36,7 +35,6 @@ const ProfilePage = () => {
   const [currentEditListIndex, setCurrentEditListIndex] = useState(null);
   const [editListName, setEditListName] = useState("");
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteListIndex, setDeleteListIndex] = useState(null);
 
