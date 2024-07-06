@@ -63,12 +63,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#121212", // Dark background
+    backgroundColor: "#121212",
   },
   title: {
     fontSize: 24,
     marginBottom: 20,
-    color: "#ffffff", // White text color
+    color: "#ffffff",
   },
   section: {
     marginVertical: 20,
@@ -79,10 +79,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: "#333333", // Lighter border color for better visibility
+    borderBottomColor: "#333333",
   },
   itemText: {
     fontSize: 18,
-    color: "#ffffff", // White text color
+    color: "#ffffff",
   },
 });
