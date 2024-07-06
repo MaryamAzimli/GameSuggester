@@ -490,6 +490,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
+    top: Platform.OS === "web" ? -40 : 0,
     paddingHorizontal: 20,
   },
   iconContainerMobile: {
