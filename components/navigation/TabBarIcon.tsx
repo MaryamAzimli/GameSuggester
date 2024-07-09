@@ -1,9 +1,41 @@
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
+import { Ionicons, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import { type IconProps } from "@expo/vector-icons/build/createIconSet";
+import { type ComponentProps } from "react";
 
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { type IconProps } from '@expo/vector-icons/build/createIconSet';
-import { type ComponentProps } from 'react';
+type IconName =
+  | ComponentProps<typeof Ionicons>["name"]
+  | ComponentProps<typeof FontAwesome5>["name"];
 
-export function TabBarIcon({ style, ...rest }: IconProps<ComponentProps<typeof Ionicons>['name']>) {
-  return <Ionicons size={28} style={[{ marginBottom: -3 }, style]} {...rest} />;
+interface CustomIconProps extends IconProps<IconName> {
+  library: "Ionicons" | "FontAwesome5" | "MaterialIcons";
+}
+
+export function TabBarIcon({ style, name, library, ...rest }: CustomIconProps) {
+  if (library === "FontAwesome5") {
+    return (
+      <FontAwesome5
+        size={25}
+        style={[{ marginBottom: -3 }, style]}
+        name={name}
+        {...rest}
+      />
+    );
+  } else if (library === "MaterialIcons") {
+    return (
+      <MaterialIcons
+        size={28}
+        style={[{ marginBottom: -3 }, style]}
+        name={name}
+        {...rest}
+      />
+    );
+  }
+  return (
+    <Ionicons
+      size={28}
+      style={[{ marginBottom: -3 }, style]}
+      name={name}
+      {...rest}
+    />
+  );
 }
