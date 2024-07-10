@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Image,
@@ -14,13 +14,90 @@ import { Ionicons, Feather } from "@expo/vector-icons";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
-import gameImage from "@/assets/defaultProfiles/elf.png";
 
 const HEADER_IMAGE = require("@/assets/defaultProfiles/elf.png");
+
+interface Game {
+  appid: string;
+  name: string;
+  release_date: string;
+  required_age: number;
+  price: number;
+  dlc_count: number;
+  detailed_description: string;
+  about_the_game: string;
+  short_description: string;
+  reviews: string;
+  header_image: string;
+  website: string;
+  support_url: string;
+  support_email: string;
+  windows: boolean;
+  mac: boolean;
+  linux: boolean;
+  metacritic_score: number;
+  metacritic_url: string;
+  achievements: number;
+  recommendations: number;
+  notes: string;
+  supported_languages: string;
+  full_audio_languages: string;
+  packages: string[];
+  developers: string[];
+  publishers: string[];
+  categories: string[];
+  genres: string[];
+  screenshots: string[];
+  movies: string[];
+  positive: number;
+  negative: number;
+  estimated_owners: number;
+  average_playtime_forever: number;
+  average_playtime_2weeks: number;
+  median_playtime_forever: number;
+  median_playtime_2weeks: number;
+  peak_ccu: number;
+  tags: string[];
+}
 
 export default function HomeScreen() {
   const navigation = useNavigation();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [games, setGames] = useState<Game[]>([]);
+  const [page, setPage] = useState(1);
+  const limit = 10; // Number of items per page
+  
+  useEffect(() => {
+    const fetchGames = async () => {
+      let url = `http://139.179.208.27:3000/api/games?page=${page}&limit=${limit}`; // Replace with your actual local IP address
+      if (Platform.OS === "android") {
+        url = `http://139.179.208.27:3000/api/games?page=${page}&limit=${limit}`; // Replace with your actual local IP address
+      }
+      try {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data: Game[] = await response.json();
+        console.log("Fetched data:", data); // Log fetched data
+        setGames(data);
+      } catch (error) {
+        console.error("Failed to fetch games:", error);
+      }
+    };
+
+    fetchGames();
+  }, [page]);
+
+  const handleNextPage = () => {
+    setPage(page + 1);
+  };
+
+  const handlePreviousPage = () => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  };
 
   const handleBellPress = () => {
     setNotificationsEnabled(!notificationsEnabled);
@@ -81,19 +158,33 @@ export default function HomeScreen() {
         />
       </ThemedView>
       <ScrollView contentContainerStyle={styles.gamesContainer}>
-        {[...Array(3)].map((_, index) => (
-          <View key={index} style={styles.gameCard}>
-            <Image source={gameImage} style={styles.gameImage} />
-            <View style={styles.gameInfo}>
-              <ThemedText style={styles.gameTitle}>Game Pro Title</ThemedText>
-              <ThemedText style={styles.gameReviews}>
-                Reviews: Very Positive
-              </ThemedText>
-              <ThemedText style={styles.gameDeveloper}>Developer</ThemedText>
+        {games.length > 0 ? (
+          games.map((game, index) => (
+            <View key={index} style={styles.gameCard}>
+              <Image source={{ uri: game.header_image }} style={styles.gameImage} />
+              <View style={styles.gameInfo}>
+                <ThemedText style={styles.gameTitle}>{game.name}</ThemedText>
+                <ThemedText style={styles.gameReviews}>
+                  Reviews: {game.reviews || "No reviews yet"}
+                </ThemedText>
+                <ThemedText style={styles.gameDeveloper}>
+                  Developer: {game.developers.join(", ")}
+                </ThemedText>
+              </View>
             </View>
-          </View>
-        ))}
+          ))
+        ) : (
+          <ThemedText style={styles.noGamesText}>No games available</ThemedText>
+        )}
       </ScrollView>
+      <View style={styles.paginationContainer}>
+        <TouchableOpacity onPress={handlePreviousPage} style={styles.paginationButton} disabled={page === 1}>
+          <ThemedText style={styles.paginationText}>Previous</ThemedText>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleNextPage} style={styles.paginationButton}>
+          <ThemedText style={styles.paginationText}>Next</ThemedText>
+        </TouchableOpacity>
+      </View>
     </ParallaxScrollView>
   );
 }
@@ -169,5 +260,26 @@ const styles = StyleSheet.create({
   gameDeveloper: {
     fontSize: 14,
     color: "#888",
+  },
+  noGamesText: {
+    fontSize: 18,
+    color: "#888",
+    textAlign: "center",
+    marginTop: 20,
+  },
+  paginationContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  paginationButton: {
+    padding: 10,
+    backgroundColor: "#444",
+    borderRadius: 8,
+  },
+  paginationText: {
+    color: "#fff",
+    fontSize: 16,
   },
 });

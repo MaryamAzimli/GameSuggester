@@ -23,6 +23,20 @@ In the output, you'll find options to open the app in a
 - [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
 - [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
+ 3. For backend, please open backend directory.
+    ```bash
+      npm i
+      node server.js
+    ```
+In the output you will see:
+Starting server...
+Credentials loaded successfully
+ - Server is running on http://localhost:3000
+ - Starting authorization and download for file ID: fileId
+ - Token set successfully
+ - File download complete
+
+For now the data is correctly fetched and shown on web but not on app itself. It takes sometime for fetched 3 games to be shown in the home page.
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
 ## Get a fresh project
