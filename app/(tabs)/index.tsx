@@ -64,32 +64,40 @@ export default function HomeScreen() {
   const navigation = useNavigation();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [games, setGames] = useState<Game[]>([]);
-
+  const [page, setPage] = useState(1);
+  const limit = 10; // Number of items per page
+  
   useEffect(() => {
     const fetchGames = async () => {
-      let url = "http://139.179.208.27:3000/api/games"; // Use your local IP address
+      let url = `http://139.179.208.27:3000/api/games?page=${page}&limit=${limit}`; // Replace with your actual local IP address
       if (Platform.OS === "android") {
-        url = "http://139.179.208.27:3000/api/games"; // Use your local IP address
-      } else if (Platform.OS === "ios") {
-        url = "http://139.179.208.27:3000/api/games"; // Use your local IP address
-      } else if (Platform.OS === "web") {
-        url = "http://localhost:3000/api/games"; // For Web
+        url = `http://139.179.208.27:3000/api/games?page=${page}&limit=${limit}`; // Replace with your actual local IP address
       }
       try {
         const response = await fetch(url);
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
-        const data = await response.json();
+        const data: Game[] = await response.json();
+        console.log("Fetched data:", data); // Log fetched data
         setGames(data);
       } catch (error) {
         console.error("Failed to fetch games:", error);
       }
-    
     };
 
     fetchGames();
-  }, []);
+  }, [page]);
+
+  const handleNextPage = () => {
+    setPage(page + 1);
+  };
+
+  const handlePreviousPage = () => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  };
 
   const handleBellPress = () => {
     setNotificationsEnabled(!notificationsEnabled);
@@ -151,7 +159,7 @@ export default function HomeScreen() {
       </ThemedView>
       <ScrollView contentContainerStyle={styles.gamesContainer}>
         {games.length > 0 ? (
-          games.slice(0, 3).map((game, index) => (
+          games.map((game, index) => (
             <View key={index} style={styles.gameCard}>
               <Image source={{ uri: game.header_image }} style={styles.gameImage} />
               <View style={styles.gameInfo}>
@@ -169,6 +177,14 @@ export default function HomeScreen() {
           <ThemedText style={styles.noGamesText}>No games available</ThemedText>
         )}
       </ScrollView>
+      <View style={styles.paginationContainer}>
+        <TouchableOpacity onPress={handlePreviousPage} style={styles.paginationButton} disabled={page === 1}>
+          <ThemedText style={styles.paginationText}>Previous</ThemedText>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleNextPage} style={styles.paginationButton}>
+          <ThemedText style={styles.paginationText}>Next</ThemedText>
+        </TouchableOpacity>
+      </View>
     </ParallaxScrollView>
   );
 }
@@ -246,7 +262,24 @@ const styles = StyleSheet.create({
     color: "#888",
   },
   noGamesText: {
-    color: "#fff",
+    fontSize: 18,
+    color: "#888",
     textAlign: "center",
+    marginTop: 20,
+  },
+  paginationContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  paginationButton: {
+    padding: 10,
+    backgroundColor: "#444",
+    borderRadius: 8,
+  },
+  paginationText: {
+    color: "#fff",
+    fontSize: 16,
   },
 });

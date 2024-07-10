@@ -4,6 +4,8 @@ const fs = require('fs');
 const { google } = require('googleapis');
 const port = 3000;
 
+require('events').EventEmitter.defaultMaxListeners = 20;
+
 console.log('Starting server...');
 
 let credentials;
@@ -45,7 +47,7 @@ function downloadFile(auth, fileId, callback) {
     { responseType: 'stream' },
     (err, res) => {
       if (err) {
-        console.log('Error downloading file:', err);
+        console.log('Error downloading file:', err.message);
         return;
       }
       let data = '';
@@ -56,23 +58,36 @@ function downloadFile(auth, fileId, callback) {
         .on('end', () => {
           console.log('File download complete');
           callback(data);
+          cleanupListeners(res.data);
         })
-        .on('error', err => console.log('Error reading file:', err));
+        .on('error', err => {
+          console.log('Error reading file:', err.message);
+          cleanupListeners(res.data);
+        });
     }
   );
 }
 
-function extractGameData(jsonData) {
+function cleanupListeners(stream) {
+  stream.removeAllListeners('data');
+  stream.removeAllListeners('end');
+  stream.removeAllListeners('error');
+}
+
+function extractGameData(jsonData, page = 1, limit = 10) {
   try {
-    //console.log('Raw JSON data:', jsonData);
     const gameData = JSON.parse(jsonData);
     const games = Object.keys(gameData).map(gameId => ({
       id: gameId,
       ...gameData[gameId]
     }));
+    
+    // Pagination
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    const paginatedGames = games.slice(startIndex, endIndex);
 
-    //console.log('Game data extracted successfully:', games);
-    return games;
+    return paginatedGames;
   } catch (error) {
     console.error('Failed to extract game data:', error);
     return [];
@@ -81,14 +96,17 @@ function extractGameData(jsonData) {
 
 app.get('/api/games', (req, res) => {
   const fileId = '1g3rxWdkl8i6RFn1EUZSuvffocYHcwWaJ'; // Replace with your actual file ID
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+
   console.log('Starting authorization and download for file ID:', fileId);
   authorizeAndDownloadFile(fileId, (data) => {
-    const gameData = extractGameData(data);
-    //console.log('Game data to be sent:', gameData); // Log game data to terminal
+    const gameData = extractGameData(data, page, limit);
+    console.log('Game data to be sent:', gameData); // Log game data to terminal
     res.json(gameData);
   });
 });
 
-app.listen(port, '0.0.0.0', () => {
-    console.log(`Server is running on http://localhost:${port}`);
-  });
+const server = app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
