@@ -10,11 +10,21 @@ import {
 } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
-import { useRoute } from "@react-navigation/native";
+import { useRoute, RouteProp } from "@react-navigation/native";
 import { AntDesign } from "@expo/vector-icons";
+import { Game } from "../(tabs)/types";
+
+type RootStackParamList = {
+  home: undefined;
+  explore: undefined;
+  profilePage: undefined;
+  'home/gameCard': { game: Game };
+};
+
+type GameCardRouteProp = RouteProp<RootStackParamList, 'home/gameCard'>;
 
 const GameCard = () => {
-  const route = useRoute();
+  const route = useRoute<GameCardRouteProp>();
   const { game } = route.params;
   const [liked, setLiked] = useState(false);
 
