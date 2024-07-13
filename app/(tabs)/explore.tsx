@@ -7,6 +7,7 @@ import {
   TextInput,
   View,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { useMediaQuery } from "react-responsive";
 import { ThemedText } from "@/components/ThemedText";
@@ -16,7 +17,7 @@ import { Game } from "./types"; // Import the Game interface
 
 export default function TabTwoScreen() {
   const isMobile = useMediaQuery({ maxWidth: 767 });
-  const { games, topReviewedGames } = useContext(GameContext);
+  const { games, topReviewedGames, loading } = useContext(GameContext);
 
   const containerStyle = isMobile
     ? [styles.container, { marginTop: 50 }]
@@ -54,13 +55,38 @@ export default function TabTwoScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.horizontalScrollView}
-      >
-        {games.length > 0 ? (
-         games.slice(0, 8).map((game: Game, index: number) => (
+      {loading ? (
+        <ActivityIndicator size="large" color="#ffffff" />
+      ) : (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.horizontalScrollView}
+        >
+          {games.length > 0 ? (
+            games.slice(0, 5).map((game: Game, index: number) => (
+              <View key={index} style={styles.gameCard}>
+                <Image source={{ uri: game.header_image }} style={styles.gameImage} />
+                <View style={styles.gameInfo}>
+                  <ThemedText style={styles.gameTitle}>{game.name}</ThemedText>
+                  <ThemedText style={styles.gameReviews}>
+                    Reviews: {game.reviews || "No reviews yet"}
+                  </ThemedText>
+                  <ThemedText style={styles.gameDeveloper}>
+                    Developer: {game.developers.join(", ")}
+                  </ThemedText>
+                </View>
+              </View>
+            ))
+          ) : (
+            <ThemedText style={styles.noGamesText}>No games available</ThemedText>
+          )}
+        </ScrollView>
+      )}
+      <ThemedView style={styles.sectionContainer}>
+        <ThemedText type="title">Top Reviewed Games</ThemedText>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScrollView}>
+          {topReviewedGames.slice(0, 5).map((game: Game, index: number) => (
             <View key={index} style={styles.gameCard}>
               <Image source={{ uri: game.header_image }} style={styles.gameImage} />
               <View style={styles.gameInfo}>
@@ -73,11 +99,9 @@ export default function TabTwoScreen() {
                 </ThemedText>
               </View>
             </View>
-          ))
-        ) : (
-          <ThemedText style={styles.noGamesText}>No games available</ThemedText>
-        )}
-      </ScrollView>
+          ))}
+        </ScrollView>
+      </ThemedView>
     </ScrollView>
   );
 }

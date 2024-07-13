@@ -8,8 +8,9 @@ import {
   TextInput,
   Alert,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, NavigationProp } from "@react-navigation/native";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
@@ -19,12 +20,21 @@ import { Game } from "./types";
 
 const HEADER_IMAGE = require("@/assets/defaultProfiles/elf.png");
 
+type RootStackParamList = {
+  home: undefined;
+  explore: undefined;
+  profilePage: undefined;
+  'home/gameCard': { game: Game };
+};
+
+type HomeScreenNavigationProp = NavigationProp<RootStackParamList, 'home'>;
+
 export default function HomeScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<HomeScreenNavigationProp>();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const { games } = useContext(GameContext);
+  const { games, loading } = useContext(GameContext);
   const [page, setPage] = useState(1);
-  const limit = 10;
+  const limit = 5;
 
   const handleNextPage = () => {
     setPage(page + 1);
@@ -50,7 +60,11 @@ export default function HomeScreen() {
   };
 
   const handleSettingsPress = () => {
-    navigation.navigate("profile/settings");
+    navigation.navigate("profilePage");
+  };
+
+  const handleGamePress = (game: Game) => {
+    navigation.navigate("home/gameCard", { game });
   };
 
   return (
@@ -94,31 +108,60 @@ export default function HomeScreen() {
           placeholderTextColor="#ccc"
         />
       </ThemedView>
-      <ScrollView contentContainerStyle={styles.gamesContainer}>
-        {games.length > 0 ? (
-          games.slice((page - 1) * limit, page * limit).map((game: Game, index: number) => (
-            <View key={index} style={styles.gameCard}>
-              <Image source={{ uri: game.header_image }} style={styles.gameImage} />
-              <View style={styles.gameInfo}>
-                <ThemedText style={styles.gameTitle}>{game.name}</ThemedText>
-                <ThemedText style={styles.gameReviews}>
-                  Reviews: {game.reviews || "No reviews yet"}
-                </ThemedText>
-                <ThemedText style={styles.gameDeveloper}>
-                  Developer: {game.developers.join(", ")}
-                </ThemedText>
-              </View>
-            </View>
-          ))
-        ) : (
-          <ThemedText style={styles.noGamesText}>No games available</ThemedText>
-        )}
-      </ScrollView>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#fff" />
+        </View>
+      ) : (
+        <ScrollView contentContainerStyle={styles.gamesContainer}>
+          {games.length > 0 ? (
+            games.slice((page - 1) * limit, page * limit).map((game: Game, index: number) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.gameCard}
+                onPress={() => handleGamePress(game)}
+              >
+                <Image
+                  source={{ uri: game.header_image }}
+                  style={styles.gameImage}
+                />
+                <View style={styles.gameInfo}>
+                  <ThemedText style={styles.gameTitle}>{game.name}</ThemedText>
+                  <ThemedText style={styles.gameReviews}>
+                    Reviews: {game.reviews || "No reviews yet"}
+                  </ThemedText>
+                  <ThemedText style={styles.gameDeveloper}>
+                    Developer: {game.developers.join(", ")}
+                  </ThemedText>
+                </View>
+              </TouchableOpacity>
+            ))
+          ) : (
+            <ThemedText style={styles.noGamesText}>
+              No games available
+            </ThemedText>
+          )}
+        </ScrollView>
+      )}
       <View style={styles.paginationContainer}>
-        <TouchableOpacity onPress={handlePreviousPage} style={styles.paginationButton} disabled={page === 1}>
+        <TouchableOpacity
+          onPress={handlePreviousPage}
+          style={[
+            styles.paginationButton,
+            page === 1 || loading ? styles.disabledButton : null,
+          ]}
+          disabled={page === 1 || loading}
+        >
           <ThemedText style={styles.paginationText}>Previous</ThemedText>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleNextPage} style={styles.paginationButton}>
+        <TouchableOpacity
+          onPress={handleNextPage}
+          style={[
+            styles.paginationButton,
+            loading ? styles.disabledButton : null,
+          ]}
+          disabled={loading}
+        >
           <ThemedText style={styles.paginationText}>Next</ThemedText>
         </TouchableOpacity>
       </View>
@@ -204,6 +247,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 20,
   },
+  loadingContainer: {
+    minHeight: 400,
+    marginBottom: 100,
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   paginationContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -218,5 +268,8 @@ const styles = StyleSheet.create({
   paginationText: {
     color: "#fff",
     fontSize: 16,
+  },
+  disabledButton: {
+    opacity: 0.5,
   },
 });
