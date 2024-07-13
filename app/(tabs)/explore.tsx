@@ -1,19 +1,25 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
+import React, { useContext } from "react";
 import {
   StyleSheet,
   Image,
-  Platform,
   ScrollView,
   TextInput,
   View,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { useMediaQuery } from "react-responsive";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import GameContext from "../GameContext";
+import { Game } from "./types"; // Import the Game interface
+import { useNavigation } from "@react-navigation/native";
 
 export default function TabTwoScreen() {
   const isMobile = useMediaQuery({ maxWidth: 767 });
+  const { games, topReviewedGames, loading } = useContext(GameContext);
+  const navigation = useNavigation();
 
   const containerStyle = isMobile
     ? [styles.container, { marginTop: 50 }]
@@ -51,57 +57,88 @@ export default function TabTwoScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.horizontalScrollView}
-      >
-        <View style={styles.gameCard}>
-          <Image source={{ uri: "h" }} style={styles.gameImage} />
-          <View style={styles.liveBadge}>
-            <ThemedText style={styles.liveText}>LIVE</ThemedText>
-          </View>
-          <View style={styles.viewersBadge}>
-            <ThemedText style={styles.viewersText}>8.1K</ThemedText>
-          </View>
-        </View>
-        <View style={styles.gameCard}>
-          <Image source={{ uri: "h" }} style={styles.gameImage} />
-          <View style={styles.liveBadge}>
-            <ThemedText style={styles.liveText}>LIVE</ThemedText>
-          </View>
-          <View style={styles.viewersBadge}>
-            <ThemedText style={styles.viewersText}>415</ThemedText>
-          </View>
-        </View>
-        <View style={styles.gameCard}>
-          <Image source={{ uri: "h" }} style={styles.gameImage} />
-          <View style={styles.liveBadge}>
-            <ThemedText style={styles.liveText}>LIVE</ThemedText>
-          </View>
-          <View style={styles.viewersBadge}>
-            <ThemedText style={styles.viewersText}>8.1K</ThemedText>
-          </View>
-        </View>
-        <View style={styles.gameCard}>
-          <Image source={{ uri: "h" }} style={styles.gameImage} />
-          <View style={styles.liveBadge}>
-            <ThemedText style={styles.liveText}>LIVE</ThemedText>
-          </View>
-          <View style={styles.viewersBadge}>
-            <ThemedText style={styles.viewersText}>415</ThemedText>
-          </View>
-        </View>
-        <View style={styles.gameCard}>
-          <Image source={{ uri: "h" }} style={styles.gameImage} />
-          <View style={styles.liveBadge}>
-            <ThemedText style={styles.liveText}>LIVE</ThemedText>
-          </View>
-          <View style={styles.viewersBadge}>
-            <ThemedText style={styles.viewersText}>8.1K</ThemedText>
-          </View>
-        </View>
-      </ScrollView>
+      {loading ? (
+        <ActivityIndicator size="large" color="#ffffff" />
+      ) : (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.horizontalScrollView}
+        >
+          {games.length > 0 ? (
+            games.slice(0, 5).map((game: Game, index: number) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.gameCard}
+                onPress={() => navigation.navigate("home/gameCard", { game })}
+              >
+                <Image
+                  source={{ uri: game.header_image }}
+                  style={styles.gameImage}
+                />
+                <View style={styles.gameInfo}>
+                  <ThemedText style={styles.gameTitle}>{game.name}</ThemedText>
+                  <ThemedText style={styles.gameReviews}>
+                    Reviews: {game.reviews || "No reviews yet"}
+                  </ThemedText>
+                  <ThemedText style={styles.gameDeveloper}>
+                    Developer: {game.developers.join(", ")}
+                  </ThemedText>
+                </View>
+              </TouchableOpacity>
+            ))
+          ) : (
+            <ThemedText style={styles.noGamesText}>
+              No games available
+            </ThemedText>
+          )}
+        </ScrollView>
+      )}
+
+      <View style={styles.sectionContainer}>
+        <ThemedText type="title">Top Reviewed Games</ThemedText>
+        <TouchableOpacity>
+          <ThemedText style={styles.viewAllText}>View all</ThemedText>
+        </TouchableOpacity>
+      </View>
+
+      {loading ? (
+        <ActivityIndicator size="large" color="#ffffff" />
+      ) : (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.horizontalScrollView}
+        >
+          {topReviewedGames.length > 0 ? (
+            topReviewedGames.slice(0, 5).map((game: Game, index: number) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.gameCard}
+                onPress={() => navigation.navigate("home/gameCard", { game })}
+              >
+                <Image
+                  source={{ uri: game.header_image }}
+                  style={styles.gameImage}
+                />
+                <View style={styles.gameInfo}>
+                  <ThemedText style={styles.gameTitle}>{game.name}</ThemedText>
+                  <ThemedText style={styles.gameReviews}>
+                    Reviews: {game.reviews || "No reviews yet"}
+                  </ThemedText>
+                  <ThemedText style={styles.gameDeveloper}>
+                    Developer: {game.developers.join(", ")}
+                  </ThemedText>
+                </View>
+              </TouchableOpacity>
+            ))
+          ) : (
+            <ThemedText style={styles.noGamesText}>
+              No games available
+            </ThemedText>
+          )}
+        </ScrollView>
+      )}
     </ScrollView>
   );
 }
@@ -159,28 +196,27 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 120,
   },
-  liveBadge: {
-    position: "absolute",
-    top: 10,
-    left: 10,
-    backgroundColor: "red",
-    padding: 5,
-    borderRadius: 5,
+  gameInfo: {
+    padding: 10,
   },
-  liveText: {
-    color: "white",
-    fontSize: 12,
+  gameTitle: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
-  viewersBadge: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
-    padding: 5,
-    borderRadius: 5,
+  gameReviews: {
+    color: "#ccc",
+    fontSize: 14,
+    marginTop: 5,
   },
-  viewersText: {
-    color: "white",
-    fontSize: 12,
+  gameDeveloper: {
+    color: "#ccc",
+    fontSize: 14,
+    marginTop: 5,
+  },
+  noGamesText: {
+    color: "#fff",
+    textAlign: "center",
+    marginTop: 20,
   },
 });
