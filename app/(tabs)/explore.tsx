@@ -14,10 +14,12 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import GameContext from "../GameContext";
 import { Game } from "./types"; // Import the Game interface
+import { useNavigation } from "@react-navigation/native";
 
 export default function TabTwoScreen() {
   const isMobile = useMediaQuery({ maxWidth: 767 });
   const { games, topReviewedGames, loading } = useContext(GameContext);
+  const navigation = useNavigation();
 
   const containerStyle = isMobile
     ? [styles.container, { marginTop: 50 }]
@@ -65,8 +67,15 @@ export default function TabTwoScreen() {
         >
           {games.length > 0 ? (
             games.slice(0, 5).map((game: Game, index: number) => (
-              <View key={index} style={styles.gameCard}>
-                <Image source={{ uri: game.header_image }} style={styles.gameImage} />
+              <TouchableOpacity
+                key={index}
+                style={styles.gameCard}
+                onPress={() => navigation.navigate("home/gameCard", { game })}
+              >
+                <Image
+                  source={{ uri: game.header_image }}
+                  style={styles.gameImage}
+                />
                 <View style={styles.gameInfo}>
                   <ThemedText style={styles.gameTitle}>{game.name}</ThemedText>
                   <ThemedText style={styles.gameReviews}>
@@ -76,32 +85,60 @@ export default function TabTwoScreen() {
                     Developer: {game.developers.join(", ")}
                   </ThemedText>
                 </View>
-              </View>
+              </TouchableOpacity>
             ))
           ) : (
-            <ThemedText style={styles.noGamesText}>No games available</ThemedText>
+            <ThemedText style={styles.noGamesText}>
+              No games available
+            </ThemedText>
           )}
         </ScrollView>
       )}
-      <ThemedView style={styles.sectionContainer}>
+
+      <View style={styles.sectionContainer}>
         <ThemedText type="title">Top Reviewed Games</ThemedText>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScrollView}>
-          {topReviewedGames.slice(0, 5).map((game: Game, index: number) => (
-            <View key={index} style={styles.gameCard}>
-              <Image source={{ uri: game.header_image }} style={styles.gameImage} />
-              <View style={styles.gameInfo}>
-                <ThemedText style={styles.gameTitle}>{game.name}</ThemedText>
-                <ThemedText style={styles.gameReviews}>
-                  Reviews: {game.reviews || "No reviews yet"}
-                </ThemedText>
-                <ThemedText style={styles.gameDeveloper}>
-                  Developer: {game.developers.join(", ")}
-                </ThemedText>
-              </View>
-            </View>
-          ))}
+        <TouchableOpacity>
+          <ThemedText style={styles.viewAllText}>View all</ThemedText>
+        </TouchableOpacity>
+      </View>
+
+      {loading ? (
+        <ActivityIndicator size="large" color="#ffffff" />
+      ) : (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.horizontalScrollView}
+        >
+          {topReviewedGames.length > 0 ? (
+            topReviewedGames.slice(0, 5).map((game: Game, index: number) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.gameCard}
+                onPress={() => navigation.navigate("home/gameCard", { game })}
+              >
+                <Image
+                  source={{ uri: game.header_image }}
+                  style={styles.gameImage}
+                />
+                <View style={styles.gameInfo}>
+                  <ThemedText style={styles.gameTitle}>{game.name}</ThemedText>
+                  <ThemedText style={styles.gameReviews}>
+                    Reviews: {game.reviews || "No reviews yet"}
+                  </ThemedText>
+                  <ThemedText style={styles.gameDeveloper}>
+                    Developer: {game.developers.join(", ")}
+                  </ThemedText>
+                </View>
+              </TouchableOpacity>
+            ))
+          ) : (
+            <ThemedText style={styles.noGamesText}>
+              No games available
+            </ThemedText>
+          )}
         </ScrollView>
-      </ThemedView>
+      )}
     </ScrollView>
   );
 }
