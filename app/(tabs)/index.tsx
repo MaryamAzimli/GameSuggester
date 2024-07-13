@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import {
   View,
   Image,
   StyleSheet,
+  Platform,
   TouchableOpacity,
   TextInput,
   Alert,
-  Platform,
   ScrollView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
@@ -14,80 +14,17 @@ import { Ionicons, Feather } from "@expo/vector-icons";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
+import GameContext from "../GameContext";
+import { Game } from "./types";
 
 const HEADER_IMAGE = require("@/assets/defaultProfiles/elf.png");
-
-interface Game {
-  appid: string;
-  name: string;
-  release_date: string;
-  required_age: number;
-  price: number;
-  dlc_count: number;
-  detailed_description: string;
-  about_the_game: string;
-  short_description: string;
-  reviews: string;
-  header_image: string;
-  website: string;
-  support_url: string;
-  support_email: string;
-  windows: boolean;
-  mac: boolean;
-  linux: boolean;
-  metacritic_score: number;
-  metacritic_url: string;
-  achievements: number;
-  recommendations: number;
-  notes: string;
-  supported_languages: string;
-  full_audio_languages: string;
-  packages: string[];
-  developers: string[];
-  publishers: string[];
-  categories: string[];
-  genres: string[];
-  screenshots: string[];
-  movies: string[];
-  positive: number;
-  negative: number;
-  estimated_owners: number;
-  average_playtime_forever: number;
-  average_playtime_2weeks: number;
-  median_playtime_forever: number;
-  median_playtime_2weeks: number;
-  peak_ccu: number;
-  tags: string[];
-}
 
 export default function HomeScreen() {
   const navigation = useNavigation();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const [games, setGames] = useState<Game[]>([]);
+  const { games } = useContext(GameContext);
   const [page, setPage] = useState(1);
-  const limit = 10; // Number of items per page
-  
-  useEffect(() => {
-    const fetchGames = async () => {
-      let url = `http://139.179.208.27:3000/api/games?page=${page}&limit=${limit}`; // Replace with your actual local IP address
-      if (Platform.OS === "android") {
-        url = `http://139.179.208.27:3000/api/games?page=${page}&limit=${limit}`; // Replace with your actual local IP address
-      }
-      try {
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        const data: Game[] = await response.json();
-        console.log("Fetched data:", data); // Log fetched data
-        setGames(data);
-      } catch (error) {
-        console.error("Failed to fetch games:", error);
-      }
-    };
-
-    fetchGames();
-  }, [page]);
+  const limit = 10;
 
   const handleNextPage = () => {
     setPage(page + 1);
@@ -159,7 +96,7 @@ export default function HomeScreen() {
       </ThemedView>
       <ScrollView contentContainerStyle={styles.gamesContainer}>
         {games.length > 0 ? (
-          games.map((game, index) => (
+          games.slice((page - 1) * limit, page * limit).map((game: Game, index: number) => (
             <View key={index} style={styles.gameCard}>
               <Image source={{ uri: game.header_image }} style={styles.gameImage} />
               <View style={styles.gameInfo}>
