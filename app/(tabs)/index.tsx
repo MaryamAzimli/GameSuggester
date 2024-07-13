@@ -66,12 +66,12 @@ export default function HomeScreen() {
   const [games, setGames] = useState<Game[]>([]);
   const [page, setPage] = useState(1);
   const limit = 10; // Number of items per page
-  
+
   useEffect(() => {
     const fetchGames = async () => {
-      let url = `http://139.179.208.27:3000/api/games?page=${page}&limit=${limit}`; // Replace with your actual local IP address
+      let url = `http://192.168.56.1:3000/api/games?page=${page}&limit=${limit}`; // Replace with your actual local IP address
       if (Platform.OS === "android") {
-        url = `http://139.179.208.27:3000/api/games?page=${page}&limit=${limit}`; // Replace with your actual local IP address
+        url = `http://192.168.56.1:3000/api/games?page=${page}&limit=${limit}`; // Replace with your actual local IP address
       }
       try {
         const response = await fetch(url);
@@ -161,7 +161,10 @@ export default function HomeScreen() {
         {games.length > 0 ? (
           games.map((game, index) => (
             <View key={index} style={styles.gameCard}>
-              <Image source={{ uri: game.header_image }} style={styles.gameImage} />
+              <Image
+                source={{ uri: game.header_image }}
+                style={styles.gameImage}
+              />
               <View style={styles.gameInfo}>
                 <ThemedText style={styles.gameTitle}>{game.name}</ThemedText>
                 <ThemedText style={styles.gameReviews}>
@@ -178,10 +181,17 @@ export default function HomeScreen() {
         )}
       </ScrollView>
       <View style={styles.paginationContainer}>
-        <TouchableOpacity onPress={handlePreviousPage} style={styles.paginationButton} disabled={page === 1}>
+        <TouchableOpacity
+          onPress={handlePreviousPage}
+          style={styles.paginationButton}
+          disabled={page === 1}
+        >
           <ThemedText style={styles.paginationText}>Previous</ThemedText>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleNextPage} style={styles.paginationButton}>
+        <TouchableOpacity
+          onPress={handleNextPage}
+          style={styles.paginationButton}
+        >
           <ThemedText style={styles.paginationText}>Next</ThemedText>
         </TouchableOpacity>
       </View>
