@@ -72,9 +72,9 @@ export default function HomeScreen() {
   useEffect(() => {
     const fetchGames = async () => {
       setLoading(true);
-      let url = `http://192.168.56.1:3000/api/games?page=${page}&limit=${limit}`; // Replace with your actual local IP address
+      let url = `http:// 192.168.0.183:3000/api/games?page=${page}&limit=${limit}`; // Replace with your actual local IP address
       if (Platform.OS === "android" || Platform.OS === "ios") {
-        url = `http://192.168.1.101:3000/api/games?page=${page}&limit=${limit}`; // Replace with your actual local IP address
+        url = `http:// 192.168.0.183:3000/api/games?page=${page}&limit=${limit}`; // Replace with your actual local IP address
       }
       try {
         const response = await fetch(url);
