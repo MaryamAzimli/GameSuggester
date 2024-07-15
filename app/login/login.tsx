@@ -10,6 +10,7 @@ import {
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useNavigation } from "expo-router";
+import LottieView from "lottie-react-native";
 
 const Login = () => {
   const navigation = useNavigation();
@@ -18,9 +19,9 @@ const Login = () => {
 
   useEffect(() => {
     navigation.setOptions({
-      headerTitle: "Login",
-      headerLeft: () => null, // this hides the back button
-      // headerShown: false, // this hides the header
+      //headerTitle: "Login",
+      //headerLeft: () => null, // this hides the back button
+      headerShown: false,
     });
   }, [navigation]);
 
@@ -34,6 +35,13 @@ const Login = () => {
       <ThemedText type="title" style={styles.title}>
         Login
       </ThemedText>
+      <View style={styles.animationContainer}>
+        <LottieView
+          source={require("@/assets/animations/suggestSimilar.json")}
+          autoPlay
+          loop
+        />
+      </View>
       <TextInput
         style={styles.input}
         placeholder="Username"
@@ -50,14 +58,12 @@ const Login = () => {
         onChangeText={setPassword}
       />
       <View style={styles.linkContainer}>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("forgot-password")}
-        >
+        <TouchableOpacity onPress={() => navigation.navigate("forgotPass")}>
           <Text style={styles.passLink}>Forgot your password?</Text>
         </TouchableOpacity>
       </View>
       <Button title="Login" onPress={handleLogin} />
-      <TouchableOpacity onPress={() => navigation.navigate("signup")}>
+      <TouchableOpacity onPress={() => navigation.navigate("login/signup")}>
         <Text style={styles.link}>Don't have an account? Signup!</Text>
       </TouchableOpacity>
     </ThemedView>
@@ -77,6 +83,11 @@ const styles = StyleSheet.create({
     fontSize: 24,
     marginBottom: 20,
     color: "#ffffff",
+  },
+  animationContainer: {
+    width: 200,
+    height: 200,
+    marginBottom: 20,
   },
   input: {
     width: "80%",

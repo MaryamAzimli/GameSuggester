@@ -60,6 +60,7 @@ const Settings = () => {
       </View>
       <View style={styles.section}>
         <SettingsItem title="About us" onPress={() => {}} />
+        <SettingsItem title="Contact us" onPress={() => {}} />
         <SettingsItem title="Privacy policy" onPress={() => {}} />
         <SettingsItem
           title="Logout"
