@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   View,
   Image,
@@ -34,7 +34,14 @@ export default function HomeScreen() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const { games, loading } = useContext(GameContext);
   const [page, setPage] = useState(1);
+  const [query, setQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
   const limit = 5;
+
+  useEffect(() => {
+    setPage(1); // Reset to first page whenever the query changes
+  }, [query]);
 
   const handleNextPage = () => {
     setPage(page + 1);
@@ -65,6 +72,30 @@ export default function HomeScreen() {
 
   const handleGamePress = (game: Game) => {
     navigation.navigate("home/gameCard", { game });
+  };
+
+  const handleSearch = async () => {
+    if (query.trim() === '') return;
+
+    setIsSearching(true);
+
+    try {
+      const formattedQuery = query.replace(/[^\w\s]/gi, '');
+      const response = await fetch(`http://localhost:3000/api/search?q=${formattedQuery}&page=${page}&limit=${limit}`);
+      const contentType = response.headers.get('content-type');
+
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Expected JSON response');
+      }
+
+      const data = await response.json();
+      console.log('Search results:', data); // Log the search results
+      setSearchResults(data);
+    } catch (error) {
+      console.error('Error during search:', error);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   return (
@@ -106,41 +137,38 @@ export default function HomeScreen() {
           style={styles.searchInput}
           placeholder="Search"
           placeholderTextColor="#ccc"
+          value={query}
+          onChangeText={setQuery}
+          onSubmitEditing={handleSearch}
         />
       </ThemedView>
-      {loading ? (
+      {(loading || isSearching) ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#fff" />
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.gamesContainer}>
-          {games.length > 0 ? (
-            games.slice((page - 1) * limit, page * limit).map((game: Game, index: number) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.gameCard}
-                onPress={() => handleGamePress(game)}
-              >
-                <Image
-                  source={{ uri: game.header_image }}
-                  style={styles.gameImage}
-                />
-                <View style={styles.gameInfo}>
-                  <ThemedText style={styles.gameTitle}>{game.name}</ThemedText>
-                  <ThemedText style={styles.gameReviews}>
-                    Reviews: {game.reviews || "No reviews yet"}
-                  </ThemedText>
-                  <ThemedText style={styles.gameDeveloper}>
-                    Developer: {game.developers.join(", ")}
-                  </ThemedText>
-                </View>
-              </TouchableOpacity>
-            ))
-          ) : (
-            <ThemedText style={styles.noGamesText}>
-              No games available
-            </ThemedText>
-          )}
+          {(searchResults.length > 0 ? searchResults : games).slice((page - 1) * limit, page * limit).map((game: Game, index: number) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.gameCard}
+              onPress={() => handleGamePress(game)}
+            >
+              <Image
+                source={{ uri: game.header_image }}
+                style={styles.gameImage}
+              />
+              <View style={styles.gameInfo}>
+                <ThemedText style={styles.gameTitle}>{game.name}</ThemedText>
+                <ThemedText style={styles.gameReviews}>
+                  Reviews: {game.reviews || "No reviews yet"}
+                </ThemedText>
+                <ThemedText style={styles.gameDeveloper}>
+                  Developer: {game.developers.join(", ")}
+                </ThemedText>
+              </View>
+            </TouchableOpacity>
+          ))}
         </ScrollView>
       )}
       <View style={styles.paginationContainer}>
