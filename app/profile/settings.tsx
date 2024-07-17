@@ -41,8 +41,6 @@ const Settings = () => {
       </ThemedText>
       <View style={styles.section}>
         <SettingsItem title="Change username" onPress={() => {}} />
-        <SettingsItem title="Change username" onPress={() => {}} />
-        <SettingsItem title="Change email" onPress={() => {}} />
         <SettingsItem title="Buy a Plan" onPress={() => {}} />
         <SettingsItem title="Add a payment method" onPress={() => {}} />
         <SettingsItem
