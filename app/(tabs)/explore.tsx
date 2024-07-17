@@ -1,5 +1,5 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import {
   StyleSheet,
   Image,
@@ -20,10 +20,37 @@ export default function TabTwoScreen() {
   const isMobile = useMediaQuery({ maxWidth: 767 });
   const { games, topReviewedGames, loading } = useContext(GameContext);
   const navigation = useNavigation();
-
+  const [query, setQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  
   const containerStyle = isMobile
     ? [styles.container, { marginTop: 50 }]
     : styles.container;
+
+  const handleSearch = async () => {
+    if (query.trim() === '') return;
+
+    setIsSearching(true);
+
+    try {
+      const formattedQuery = query.replace(/[^\w\s]/gi, '');
+      const response = await fetch(`http://localhost:3000/api/search?q=${formattedQuery}`);
+      const contentType = response.headers.get('content-type');
+
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Expected JSON response');
+      }
+
+      const data = await response.json();
+      console.log('Search results:', data); // Log the search results
+      setSearchResults(data);
+    } catch (error) {
+      console.error('Error during search:', error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   return (
     <ScrollView style={containerStyle}>
@@ -43,6 +70,9 @@ export default function TabTwoScreen() {
             style={styles.searchInput}
             placeholder="Search"
             placeholderTextColor="#ccc"
+            value={query}
+            onChangeText={setQuery}
+            onSubmitEditing={handleSearch}
           />
           <TouchableOpacity style={styles.filterButton}>
             <Ionicons name="filter" size={24} color="white" />
@@ -50,14 +80,7 @@ export default function TabTwoScreen() {
         </View>
       </ThemedView>
 
-      <View style={styles.sectionContainer}>
-        <ThemedText type="title">Top RPG Games</ThemedText>
-        <TouchableOpacity>
-          <ThemedText style={styles.viewAllText}>View all</ThemedText>
-        </TouchableOpacity>
-      </View>
-
-      {loading ? (
+      {(loading || isSearching) ? (
         <ActivityIndicator size="large" color="#ffffff" />
       ) : (
         <ScrollView
@@ -65,33 +88,27 @@ export default function TabTwoScreen() {
           showsHorizontalScrollIndicator={false}
           style={styles.horizontalScrollView}
         >
-          {games.length > 0 ? (
-            games.slice(0, 5).map((game: Game, index: number) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.gameCard}
-                onPress={() => navigation.navigate("home/gameCard", { game })}
-              >
-                <Image
-                  source={{ uri: game.header_image }}
-                  style={styles.gameImage}
-                />
-                <View style={styles.gameInfo}>
-                  <ThemedText style={styles.gameTitle}>{game.name}</ThemedText>
-                  <ThemedText style={styles.gameReviews}>
-                    Reviews: {game.reviews || "No reviews yet"}
-                  </ThemedText>
-                  <ThemedText style={styles.gameDeveloper}>
-                    Developer: {game.developers.join(", ")}
-                  </ThemedText>
-                </View>
-              </TouchableOpacity>
-            ))
-          ) : (
-            <ThemedText style={styles.noGamesText}>
-              No games available
-            </ThemedText>
-          )}
+          {(searchResults.length > 0 ? searchResults : games).slice(0, 10).map((game: Game, index: number) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.gameCard}
+              onPress={() => navigation.navigate("home/gameCard", { game })}
+            >
+              <Image
+                source={{ uri: game.header_image }}
+                style={styles.gameImage}
+              />
+              <View style={styles.gameInfo}>
+                <ThemedText style={styles.gameTitle}>{game.name}</ThemedText>
+                <ThemedText style={styles.gameReviews}>
+                  Reviews: {game.reviews || "No reviews yet"}
+                </ThemedText>
+                <ThemedText style={styles.gameDeveloper}>
+                  Developer: {game.developers.join(", ")}
+                </ThemedText>
+              </View>
+            </TouchableOpacity>
+          ))}
         </ScrollView>
       )}
 
