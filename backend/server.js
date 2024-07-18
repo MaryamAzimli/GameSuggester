@@ -114,7 +114,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/games', (req, res) => {
-  const fileId = '1g3rxWdkl8i6RFn1EUZSuvffocYHcwWaJ'; // Replace with your actual file ID
+  const fileId = '1l7lbMzTwMRDmpy_rr3HKX3qsOcOkCuyH'; // Replace with your new actual file ID
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
 
@@ -169,7 +169,7 @@ app.get('/api/search', (req, res) => {
 
   if (shouldFetchFromDrive()) {
     console.log('Fetching game data from Drive for search');
-    authorizeAndDownloadFile('1g3rxWdkl8i6RFn1EUZSuvffocYHcwWaJ', (data) => {
+    authorizeAndDownloadFile('1l7lbMzTwMRDmpy_rr3HKX3qsOcOkCuyH', (data) => {
       cachedGameData = extractGameData(data);
       lastFetchTime = new Date();
       console.log('Newly fetched game data:', cachedGameData); // Log the newly fetched game data
