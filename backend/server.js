@@ -1,8 +1,11 @@
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
+const readline = require('readline');
 const { google } = require('googleapis');
 const port = 3000;
+
+require('events').EventEmitter.defaultMaxListeners = 20;
 
 console.log('Starting server...');
 let credentials;
@@ -23,7 +26,7 @@ function authorizeAndDownloadFile(fileId, callback) {
   fs.readFile('token.json', (err, token) => {
     if (err) {
       console.error('Error loading token.json:', err);
-      getNewToken();
+      getNewToken(fileId, callback);
       return;
     }
     oAuth2Client.setCredentials(JSON.parse(token));
@@ -38,12 +41,33 @@ function authorizeAndDownloadFile(fileId, callback) {
   });
 }
 
-function getNewToken() {
+function getNewToken(fileId, callback) {
   const authUrl = oAuth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: ['https://www.googleapis.com/auth/drive.readonly'],
   });
   console.log('Authorize this app by visiting this url:', authUrl);
+
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+  rl.question('Enter the code from that page here: ', (code) => {
+    rl.close();
+    oAuth2Client.getToken(code, (err, token) => {
+      if (err) {
+        console.error('Error while trying to retrieve access token', err);
+        return;
+      }
+      oAuth2Client.setCredentials(token);
+      // Store the token to disk for later program executions
+      fs.writeFile('token.json', JSON.stringify(token), (err) => {
+        if (err) console.error(err);
+        console.log('Token stored to token.json');
+      });
+      downloadFile(oAuth2Client, fileId, callback);
+    });
+  });
 }
 
 function downloadFile(auth, fileId, callback) {
@@ -56,7 +80,7 @@ function downloadFile(auth, fileId, callback) {
         if (err.code === 401 || err.message === 'invalid_grant') {
           console.log('Error downloading file: invalid_grant');
           fs.unlinkSync('token.json'); // Delete the invalid token
-          getNewToken(); // Prompt for reauthorization
+          getNewToken(fileId, callback); // Prompt for reauthorization
           return;
         } else {
           console.log('Error downloading file:', err.message);
@@ -114,7 +138,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/games', (req, res) => {
-  const fileId = '1g3rxWdkl8i6RFn1EUZSuvffocYHcwWaJ'; // Replace with your actual file ID
+  const fileId = '1l7lbMzTwMRDmpy_rr3HKX3qsOcOkCuyH'; // Replace with your new actual file ID
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
 
@@ -169,7 +193,7 @@ app.get('/api/search', (req, res) => {
 
   if (shouldFetchFromDrive()) {
     console.log('Fetching game data from Drive for search');
-    authorizeAndDownloadFile('1g3rxWdkl8i6RFn1EUZSuvffocYHcwWaJ', (data) => {
+    authorizeAndDownloadFile('1l7lbMzTwMRDmpy_rr3HKX3qsOcOkCuyH', (data) => {
       cachedGameData = extractGameData(data);
       lastFetchTime = new Date();
       console.log('Newly fetched game data:', cachedGameData); // Log the newly fetched game data
