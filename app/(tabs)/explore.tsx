@@ -20,36 +20,42 @@ export default function TabTwoScreen() {
   const isMobile = useMediaQuery({ maxWidth: 767 });
   const { games, topReviewedGames, loading } = useContext(GameContext);
   const navigation = useNavigation();
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
-  
+
   const containerStyle = isMobile
     ? [styles.container, { marginTop: 50 }]
     : styles.container;
 
   const handleSearch = async () => {
-    if (query.trim() === '') return;
+    if (query.trim() === "") return;
 
     setIsSearching(true);
 
     try {
-      const formattedQuery = query.replace(/[^\w\s]/gi, '');
-      const response = await fetch(`http://localhost:3000/api/search?q=${formattedQuery}`);
-      const contentType = response.headers.get('content-type');
+      const formattedQuery = query.replace(/[^\w\s]/gi, "");
+      const response = await fetch(
+        `http://localhost:3000/api/search?q=${formattedQuery}`
+      );
+      const contentType = response.headers.get("content-type");
 
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('Expected JSON response');
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Expected JSON response");
       }
 
       const data = await response.json();
-      console.log('Search results:', data); // Log the search results
+      console.log("Search results:", data); // Log the search results
       setSearchResults(data);
     } catch (error) {
-      console.error('Error during search:', error);
+      console.error("Error during search:", error);
     } finally {
       setIsSearching(false);
     }
+  };
+
+  const truncateText = (text, length) => {
+    return text.length > length ? text.substring(0, length) + "..." : text;
   };
 
   return (
@@ -80,7 +86,7 @@ export default function TabTwoScreen() {
         </View>
       </ThemedView>
 
-      {(loading || isSearching) ? (
+      {loading || isSearching ? (
         <ActivityIndicator size="large" color="#ffffff" />
       ) : (
         <ScrollView
@@ -88,27 +94,34 @@ export default function TabTwoScreen() {
           showsHorizontalScrollIndicator={false}
           style={styles.horizontalScrollView}
         >
-          {(searchResults.length > 0 ? searchResults : games).slice(0, 10).map((game: Game, index: number) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.gameCard}
-              onPress={() => navigation.navigate("home/gameCard", { game })}
-            >
-              <Image
-                source={{ uri: game.header_image }}
-                style={styles.gameImage}
-              />
-              <View style={styles.gameInfo}>
-                <ThemedText style={styles.gameTitle}>{game.name}</ThemedText>
-                <ThemedText style={styles.gameReviews}>
-                  Reviews: {game.reviews || "No reviews yet"}
-                </ThemedText>
-                <ThemedText style={styles.gameDeveloper}>
-                  Developer: {game.developers.join(", ")}
-                </ThemedText>
-              </View>
-            </TouchableOpacity>
-          ))}
+          {(searchResults.length > 0 ? searchResults : games)
+            .slice(0, 10)
+            .map((game: Game, index: number) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.gameCard}
+                onPress={() => navigation.navigate("home/gameCard", { game })}
+              >
+                <Image
+                  source={{ uri: game.header_image }}
+                  style={styles.gameImage}
+                />
+                <View style={styles.gameInfo}>
+                  <ThemedText style={styles.gameTitle}>{game.name}</ThemedText>
+                  <ThemedText style={styles.gameReviews}>
+                    Reviews:{" "}
+                    {truncateText(game.reviews || "No reviews yet", 100)}
+                    <ThemedText style={styles.readMoreText}>
+                      {" "}
+                      Read More...
+                    </ThemedText>
+                  </ThemedText>
+                  <ThemedText style={styles.gameDeveloper}>
+                    Developer: {game.developers.join(", ")}
+                  </ThemedText>
+                </View>
+              </TouchableOpacity>
+            ))}
         </ScrollView>
       )}
 
@@ -141,7 +154,12 @@ export default function TabTwoScreen() {
                 <View style={styles.gameInfo}>
                   <ThemedText style={styles.gameTitle}>{game.name}</ThemedText>
                   <ThemedText style={styles.gameReviews}>
-                    Reviews: {game.reviews || "No reviews yet"}
+                    Reviews:{" "}
+                    {truncateText(game.reviews || "No reviews yet", 100)}
+                    <ThemedText style={styles.readMoreText}>
+                      {" "}
+                      Read More...
+                    </ThemedText>
                   </ThemedText>
                   <ThemedText style={styles.gameDeveloper}>
                     Developer: {game.developers.join(", ")}
@@ -235,5 +253,8 @@ const styles = StyleSheet.create({
     color: "#fff",
     textAlign: "center",
     marginTop: 20,
+  },
+  readMoreText: {
+    color: "#87C4FF",
   },
 });
