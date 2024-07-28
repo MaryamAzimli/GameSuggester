@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { StyleSheet, View, Text, Switch, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  Switch,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -36,40 +43,42 @@ const Settings = () => {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.title}>
-        Settings
-      </ThemedText>
-      <View style={styles.section}>
-        <SettingsItem title="Change username" onPress={() => {}} />
-        <SettingsItem title="Buy a Plan" onPress={() => {}} />
-        <SettingsItem title="Add a payment method" onPress={() => {}} />
-        <SettingsItem
-          title="Push notifications"
-          hasSwitch
-          switchValue={pushNotifications}
-          onSwitchChange={(value) => setPushNotifications(value)}
-        />
-        <SettingsItem
-          title="Dark mode"
-          hasSwitch
-          switchValue={darkMode}
-          onSwitchChange={(value) => setDarkMode(value)}
-        />
-      </View>
-      <View style={styles.section}>
-        <SettingsItem title="About us" onPress={() => {}} />
-        <SettingsItem title="Contact us" onPress={() => {}} />
-        <SettingsItem title="Privacy policy" onPress={() => {}} />
-        <SettingsItem
-          title="Logout"
-          onPress={() => {
-            navigation.navigate("login/login");
-          }}
-          icon={<MaterialIcons name="logout" size={24} color="red" />}
-          style={styles.logoutItem}
-          textStyle={styles.logoutText}
-        />
-      </View>
+      <ScrollView>
+        <ThemedText type="title" style={styles.title}>
+          Settings
+        </ThemedText>
+        <View style={styles.section}>
+          <SettingsItem title="Change username" onPress={() => {}} />
+          <SettingsItem title="Buy a Plan" onPress={() => {}} />
+          <SettingsItem title="Add a payment method" onPress={() => {}} />
+          <SettingsItem
+            title="Push notifications"
+            hasSwitch
+            switchValue={pushNotifications}
+            onSwitchChange={(value) => setPushNotifications(value)}
+          />
+          <SettingsItem
+            title="Dark mode"
+            hasSwitch
+            switchValue={darkMode}
+            onSwitchChange={(value) => setDarkMode(value)}
+          />
+        </View>
+        <View style={styles.section}>
+          <SettingsItem title="About us" onPress={() => {}} />
+          <SettingsItem title="Contact us" onPress={() => {}} />
+          <SettingsItem title="Privacy policy" onPress={() => {}} />
+          <SettingsItem
+            title="Logout"
+            onPress={() => {
+              navigation.navigate("login/login");
+            }}
+            icon={<MaterialIcons name="logout" size={24} color="red" />}
+            style={styles.logoutItem}
+            textStyle={styles.logoutText}
+          />
+        </View>
+      </ScrollView>
     </ThemedView>
   );
 };
