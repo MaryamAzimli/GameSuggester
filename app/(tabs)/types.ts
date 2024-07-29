@@ -38,5 +38,5 @@ export interface Game {
   median_playtime_forever: number;
   median_playtime_2weeks: number;
   peak_ccu: number;
-  tags: string[];
+  clean_tags: string[];
 }
