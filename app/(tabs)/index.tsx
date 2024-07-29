@@ -24,17 +24,17 @@ type RootStackParamList = {
   home: undefined;
   explore: undefined;
   profilePage: undefined;
-  'home/gameCard': { game: Game };
+  "home/gameCard": { game: Game };
 };
 
-type HomeScreenNavigationProp = NavigationProp<RootStackParamList, 'home'>;
+type HomeScreenNavigationProp = NavigationProp<RootStackParamList, "home">;
 
 export default function HomeScreen() {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const { games, loading } = useContext(GameContext);
   const [page, setPage] = useState(1);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const limit = 5;
@@ -75,24 +75,26 @@ export default function HomeScreen() {
   };
 
   const handleSearch = async () => {
-    if (query.trim() === '') return;
+    if (query.trim() === "") return;
 
     setIsSearching(true);
 
     try {
-      const formattedQuery = query.replace(/[^\w\s]/gi, '');
-      const response = await fetch(`http://localhost:3000/api/search?q=${formattedQuery}&page=${page}&limit=${limit}`);
-      const contentType = response.headers.get('content-type');
+      const formattedQuery = query.replace(/[^\w\s]/gi, "");
+      const response = await fetch(
+        `http://localhost:3000/api/search?q=${formattedQuery}&page=${page}&limit=${limit}`
+      );
+      const contentType = response.headers.get("content-type");
 
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('Expected JSON response');
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Expected JSON response");
       }
 
       const data = await response.json();
-      console.log('Search results:', data); // Log the search results
+      console.log("Search results:", data); // Log the search results
       setSearchResults(data);
     } catch (error) {
-      console.error('Error during search:', error);
+      console.error("Error during search:", error);
     } finally {
       setIsSearching(false);
     }
@@ -142,33 +144,49 @@ export default function HomeScreen() {
           onSubmitEditing={handleSearch}
         />
       </ThemedView>
-      {(loading || isSearching) ? (
+      {loading || isSearching ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#fff" />
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.gamesContainer}>
-          {(searchResults.length > 0 ? searchResults : games).slice((page - 1) * limit, page * limit).map((game: Game, index: number) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.gameCard}
-              onPress={() => handleGamePress(game)}
-            >
-              <Image
-                source={{ uri: game.header_image }}
-                style={styles.gameImage}
-              />
-              <View style={styles.gameInfo}>
-                <ThemedText style={styles.gameTitle}>{game.name}</ThemedText>
-                <ThemedText style={styles.gameReviews}>
-                  Reviews: {game.reviews || "No reviews yet"}
-                </ThemedText>
-                <ThemedText style={styles.gameDeveloper}>
-                  Developer: {game.developers.join(", ")}
-                </ThemedText>
-              </View>
-            </TouchableOpacity>
-          ))}
+          {(searchResults.length > 0 ? searchResults : games)
+            .slice((page - 1) * limit, page * limit)
+            .map((game: Game, index: number) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.gameCard}
+                onPress={() => handleGamePress(game)}
+              >
+                <Image
+                  source={{ uri: game.header_image }}
+                  style={styles.gameImage}
+                />
+                <View style={styles.gameInfo}>
+                  <ThemedText
+                    style={styles.gameTitle}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {game.name}
+                  </ThemedText>
+                  <ThemedText
+                    style={styles.gameReviews}
+                    numberOfLines={2}
+                    ellipsizeMode="tail"
+                  >
+                    Reviews: {game.reviews || "No reviews yet"}
+                  </ThemedText>
+                  <ThemedText
+                    style={styles.gameDeveloper}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    Developer: {game.developers.join(", ")}
+                  </ThemedText>
+                </View>
+              </TouchableOpacity>
+            ))}
         </ScrollView>
       )}
       <View style={styles.paginationContainer}>
@@ -256,18 +274,22 @@ const styles = StyleSheet.create({
   gameInfo: {
     marginLeft: 10,
     justifyContent: "center",
+    flex: 1,
   },
   gameTitle: {
     fontSize: 18,
     color: "#fff",
+    flexShrink: 1,
   },
   gameReviews: {
     fontSize: 14,
     color: "#888",
+    flexShrink: 1,
   },
   gameDeveloper: {
     fontSize: 14,
     color: "#888",
+    flexShrink: 1,
   },
   noGamesText: {
     fontSize: 18,
