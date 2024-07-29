@@ -15,6 +15,10 @@ import { useRoute, RouteProp } from "@react-navigation/native";
 import { AntDesign } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Game } from "../(tabs)/types";
+import Entypo from "@expo/vector-icons/Entypo";
+import { Modal, Button } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+
 {
   /*import LottieView from "lottie-react-native";*/
 }
@@ -32,6 +36,15 @@ const GameCard = () => {
   const route = useRoute<GameCardRouteProp>();
   const { game } = route.params;
   const [liked, setLiked] = useState(false);
+  const [tagColors, setTagColors] = useState({});
+  const [modalVisible, setModalVisible] = useState(false);
+  const initialTagColor = "transparent";
+  const navigation = useNavigation();
+
+  const handleTagSelection = () => {
+    setModalVisible(true);
+  };
+
   {
     /*let devAnimation;*/
   }
@@ -56,6 +69,29 @@ const GameCard = () => {
       }
       return newLiked;
     });
+  };
+
+  const getRandomColor = () => {
+    const letters = "0123456789ABCDEF";
+    let color = "#";
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  };
+
+  const handleTagClick = (tag) => {
+    if (Array.isArray(game.clean_tags) && game.clean_tags.length > 0) {
+      setTagColors((prevColors) => ({
+        ...prevColors,
+        [tag]:
+          prevColors[tag] && prevColors[tag] !== initialTagColor
+            ? initialTagColor
+            : getRandomColor(),
+      }));
+    } else {
+      handleTagSelection();
+    }
   };
 
   return (
@@ -83,14 +119,116 @@ const GameCard = () => {
           </View>
           <View style={styles.detailsContainer}>
             <ThemedText>{game.detailed_description}</ThemedText>
-            <ThemedText>Developer: {game.developers.join(", ")}</ThemedText>
-            <ThemedText>Publisher: {game.publishers.join(", ")}</ThemedText>
-            <ThemedText>Release Date: {game.release_date}</ThemedText>
+            <ThemedText>
+              <ThemedText style={styles.headText}>Developer: </ThemedText>
+              <ThemedText>
+                {game.developers?.join(", ") || "Unknown"}
+              </ThemedText>
+            </ThemedText>
+
+            <ThemedText>
+              <ThemedText style={styles.headText}>Release Date: </ThemedText>
+              <ThemedText>{game.release_date}</ThemedText>
+            </ThemedText>
+            <ThemedText>
+              <ThemedText style={styles.headText}>Price: </ThemedText>
+              <ThemedText>{game.price}$</ThemedText>
+            </ThemedText>
+            <ThemedText>
+              <ThemedText style={styles.headText}>
+                Available Platforms
+              </ThemedText>
+
+              <ThemedText style={styles.platformText}>
+                Windows:{" "}
+                {game.windows ? (
+                  <Entypo name="check" size={24} color="green" />
+                ) : (
+                  <Entypo name="cross" size={24} color="red" />
+                )}{" "}
+              </ThemedText>
+              <ThemedText style={styles.platformText}>
+                MacOs:{" "}
+                {game.mac ? (
+                  <Entypo name="check" size={24} color="green" />
+                ) : (
+                  <Entypo name="cross" size={24} color="red" />
+                )}{" "}
+              </ThemedText>
+              <ThemedText style={styles.platformText}>
+                Linux:{" "}
+                {game.linux ? (
+                  <Entypo name="check" size={24} color="green" />
+                ) : (
+                  <Entypo name="cross" size={24} color="red" />
+                )}
+              </ThemedText>
+            </ThemedText>
+            <ThemedText>
+              <ThemedText style={styles.headText}>Tags:</ThemedText>
+            </ThemedText>
+            <View style={styles.tagsContainer}>
+              {Array.isArray(game.clean_tags) ? (
+                game.clean_tags.map((tag, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={[
+                      styles.tagButton,
+                      {
+                        backgroundColor: tagColors[tag] || "transparent",
+                        borderColor: "black",
+                        borderWidth: 1,
+                      },
+                    ]}
+                    onPress={() => handleTagClick(tag)}
+                  >
+                    <ThemedText>{tag}</ThemedText>
+                  </TouchableOpacity>
+                ))
+              ) : typeof game.clean_tags === "object" ? (
+                Object.keys(game.clean_tags).map((key, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={[
+                      styles.tagButton,
+                      {
+                        backgroundColor: tagColors[key] || "transparent",
+                        borderColor: "black",
+                        borderWidth: 1,
+                      },
+                    ]}
+                    onPress={() => handleTagClick(key)}
+                  >
+                    <ThemedText>{key}</ThemedText>
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <TouchableOpacity
+                  style={[
+                    styles.tagButton,
+                    {
+                      backgroundColor:
+                        tagColors[game.clean_tags] || "transparent",
+                      borderColor: "black",
+                      borderWidth: 1,
+                    },
+                  ]}
+                  onPress={() => handleTagClick(game.clean_tags)}
+                >
+                  <ThemedText>{game.clean_tags}</ThemedText>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            <ThemedText>
+              <ThemedText style={styles.headText}>Score: </ThemedText>
+              <ThemedText>{game.metacritic_score}</ThemedText>
+            </ThemedText>
           </View>
         </ScrollView>
         <TouchableOpacity
           style={styles.suggestButton}
-          //onPress={handleSuggestSimilar}
+          onPress={handleTagSelection}
         >
           <LinearGradient
             colors={["#8E2DE2", "#4A00E0", "#FF0080"]}
@@ -98,9 +236,32 @@ const GameCard = () => {
             end={{ x: 1, y: 1 }}
             style={styles.gradient}
           >
-            <Text style={styles.suggestButtonText}>Suggest Similar</Text>
+            <ThemedText style={styles.suggestButtonText}>
+              Suggest Similar
+            </ThemedText>
           </LinearGradient>
         </TouchableOpacity>
+
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(!modalVisible);
+          }}
+        >
+          <View style={styles.modalView}>
+            <ThemedText style={styles.modalText}>Select Tags</ThemedText>
+            <Button title="Select All" onPress={() => {}} />
+            <Button
+              title="Submit"
+              onPress={() => {
+                setModalVisible(false);
+                //navigation.navigate("");
+              }}
+            />
+          </View>
+        </Modal>
       </View>
     </ThemedView>
   );
@@ -163,6 +324,42 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
     fontWeight: "bold",
+    textAlign: "center",
+  },
+  platformText: {
+    display: "flex",
+  },
+  headText: {
+    fontWeight: "bold",
+  },
+  tagsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    marginVertical: 10,
+  },
+  tagButton: {
+    padding: 5,
+    margin: 3,
+    borderRadius: 5,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
     textAlign: "center",
   },
 });
