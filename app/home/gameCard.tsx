@@ -16,7 +16,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Game } from "../(tabs)/types";
 import Entypo from "@expo/vector-icons/Entypo";
-import { Modal, Button } from "react-native";
+import { Button } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 {
@@ -37,13 +37,8 @@ const GameCard = () => {
   const { game } = route.params;
   const [liked, setLiked] = useState(false);
   const [tagColors, setTagColors] = useState({});
-  const [modalVisible, setModalVisible] = useState(false);
   const initialTagColor = "transparent";
   const navigation = useNavigation();
-
-  const handleTagSelection = () => {
-    setModalVisible(true);
-  };
 
   {
     /*let devAnimation;*/
@@ -89,9 +84,11 @@ const GameCard = () => {
             ? initialTagColor
             : getRandomColor(),
       }));
-    } else {
-      handleTagSelection();
     }
+  };
+
+  const handleSuggestClick = () => {
+    navigation.navigate("home/suggestedGames");
   };
 
   return (
@@ -135,6 +132,14 @@ const GameCard = () => {
               <ThemedText>{game.price}$</ThemedText>
             </ThemedText>
             <ThemedText>
+              <ThemedText style={styles.headText}>Score: </ThemedText>
+              <ThemedText>{game.metacritic_score}</ThemedText>
+            </ThemedText>
+            <ThemedText>
+              <ThemedText style={styles.headText}>User Reviews: </ThemedText>
+              <ThemedText>{game.score_rank}</ThemedText>
+            </ThemedText>
+            <ThemedText style={styles.platContainer}>
               <ThemedText style={styles.headText}>
                 Available Platforms
               </ThemedText>
@@ -164,6 +169,7 @@ const GameCard = () => {
                 )}
               </ThemedText>
             </ThemedText>
+
             <ThemedText>
               <ThemedText style={styles.headText}>Tags:</ThemedText>
             </ThemedText>
@@ -219,16 +225,12 @@ const GameCard = () => {
                 </TouchableOpacity>
               )}
             </View>
-
-            <ThemedText>
-              <ThemedText style={styles.headText}>Score: </ThemedText>
-              <ThemedText>{game.metacritic_score}</ThemedText>
-            </ThemedText>
           </View>
         </ScrollView>
+
         <TouchableOpacity
           style={styles.suggestButton}
-          onPress={handleTagSelection}
+          onPress={handleSuggestClick}
         >
           <LinearGradient
             colors={["#8E2DE2", "#4A00E0", "#FF0080"]}
@@ -241,27 +243,6 @@ const GameCard = () => {
             </ThemedText>
           </LinearGradient>
         </TouchableOpacity>
-
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => {
-            setModalVisible(!modalVisible);
-          }}
-        >
-          <View style={styles.modalView}>
-            <ThemedText style={styles.modalText}>Select Tags</ThemedText>
-            <Button title="Select All" onPress={() => {}} />
-            <Button
-              title="Submit"
-              onPress={() => {
-                setModalVisible(false);
-                //navigation.navigate("");
-              }}
-            />
-          </View>
-        </Modal>
       </View>
     </ThemedView>
   );
@@ -308,6 +289,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   suggestButton: {
+    marginTop: 50,
     borderRadius: 25,
     overflow: "hidden",
     width: "80%",
@@ -325,6 +307,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
+  },
+  platContainer: {
+    display: "flex",
+    gap: 40,
   },
   platformText: {
     display: "flex",
