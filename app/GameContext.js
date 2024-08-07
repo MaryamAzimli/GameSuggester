@@ -13,8 +13,7 @@ export const GameProvider = ({ children }) => {
     if (!isDataFetched) {
       const fetchGames = async () => {
         setLoading(true);
-        let url = `http://139.179.208.27:3000/api/games?page=1&limit=100`; // Fetch a large enough limit to avoid pagination for now
-       
+        
         try {
           const response = await fetch(url);
           if (!response.ok) {
