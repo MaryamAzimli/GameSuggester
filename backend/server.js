@@ -208,3 +208,18 @@ app.get('/api/search', (req, res) => {
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
+
+
+app.get('/api/games/:id', (req, res) => {
+  const gameId = req.params.id;
+  if (cachedGameData) {
+    const game = cachedGameData.find(g => g.id === gameId);
+    if (game) {
+      res.json(game);
+    } else {
+      res.status(404).send('Game not found');
+    }
+  } else {
+    res.status(500).send('Game data is not available');
+  }
+});

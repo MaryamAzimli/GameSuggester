@@ -119,9 +119,8 @@ const GameCard = () => {
       .then((response) => response.json())
       .then((data) => {
         console.log("Success:", data);
-        // Navigate to a new screen or show a success message
-        navigation.navigate("home/suggestedGames", { suggestions: data });
-        console.log(data)
+        const appids = data.suggestions.map((item) => item.appid);
+        navigation.navigate("home/suggestedGames", { appids });
       })
       .catch((error) => {
         console.error("Error:", error);
