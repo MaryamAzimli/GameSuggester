@@ -82,7 +82,7 @@ export default function HomeScreen() {
     try {
       const formattedQuery = query.replace(/[^\w\s]/gi, "");
       const response = await fetch(
-        `http://localhost:3000/api/search?q=${formattedQuery}&page=${page}&limit=${limit}`
+        `http://192.168.0.183:3000/api/search?q=${formattedQuery}&page=${page}&limit=${limit}`
       );
       const contentType = response.headers.get("content-type");
 

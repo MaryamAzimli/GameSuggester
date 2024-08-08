@@ -88,7 +88,44 @@ const GameCard = () => {
   };
 
   const handleSuggestClick = () => {
-    navigation.navigate("home/suggestedGames");
+
+    const selectedTags = Object.keys(tagColors).filter(
+      (tag) => tagColors[tag] !== initialTagColor
+    );
+
+
+     // Ensure appid is a valid integer
+  const appid = parseInt(game.id, 10);
+
+  // Check if appid is a number and greater than zero
+  if (isNaN(appid) || appid <= 0) {
+    console.error("Invalid appid:", game.appid);
+    return;
+  }
+
+    const payload = {
+      appid: appid,
+      tags: selectedTags,
+    };
+
+    fetch("https://ep4js2tqr3bhiy3m3xoqyydkim0qrvvg.lambda-url.eu-west-2.on.aws/suggestions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      mode: "cors", 
+      body: JSON.stringify(payload),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Success:", data);
+        // Navigate to a new screen or show a success message
+        navigation.navigate("home/suggestedGames", { suggestions: data });
+        console.log(data)
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
   };
 
   return (
