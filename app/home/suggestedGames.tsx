@@ -13,22 +13,16 @@ import {
 import { ThemedText } from "@/components/ThemedText";
 import LottieView from "lottie-react-native";
 import Entypo from "@expo/vector-icons/Entypo";
-import { useNavigation } from "@react-navigation/native";
-
-const gameData = [
-  { id: 1, name: "Game 1", image: "/assets/defaultProfiles/alien.png" },
-  { id: 2, name: "Game 2", image: "/assets/defaultProfiles/criminal.png" },
-  { id: 3, name: "Game 3", image: "/assets/defaultProfiles/monster.png" },
-  { id: 4, name: "Game 5", image: "/assets/defaultProfiles/ninja.png" },
-];
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 
 const SuggestedGamesPage = () => {
   const navigation = useNavigation();
+  const route = useRoute();
   const [colorAnimation] = useState(new Animated.Value(0));
-  const [games, setGames] = useState(gameData);
+  const [games, setGames] = useState<any[]>([]);
   const position = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
 
   const panResponder = useRef(
@@ -107,6 +101,29 @@ const SuggestedGamesPage = () => {
 
     startAnimation();
   }, [colorAnimation]);
+
+  useEffect(() => {
+    const fetchGameData = async () => {
+      try {
+        const appids = route.params?.appids || [];
+        const gamePromises = appids.map((id) =>
+          fetch(`http://192.168.0.183:3000/api/games/${id}`)
+            .then((response) => response.json())
+            .then((data) => ({
+              id: data.id,
+              name: data.name,
+              image: data.header_image || "/assets/defaultProfiles/default.png", // Placeholder image path
+            }))
+        );
+        const fetchedGames = await Promise.all(gamePromises);
+        setGames(fetchedGames);
+      } catch (error) {
+        console.error("Failed to fetch game data:", error);
+      }
+    };
+
+    fetchGameData();
+  }, [route.params?.appids]);
 
   const backgroundColor = colorAnimation.interpolate({
     inputRange: [0, 1],
