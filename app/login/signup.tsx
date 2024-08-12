@@ -76,16 +76,17 @@ const Signup = () => {
     Clipboard.setString(suggestedPassword);
   };
 
-  return (
-    <ThemedView style={styles.container}>
-      {Platform.OS !== "web" && (
+  const platform = () => {
+    if(Platform.OS === "android" || Platform.OS === "ios"){
+     return(
+      <ThemedView style={styles.container}>
         <LottieView
           source={require("@/assets/animations/train.json")}
           autoPlay
           loop
           style={styles.animation}
         />
-      )}
+
       <View style={styles.blurContainer}>
         <ThemedText type="title" style={styles.subtitle}>
           Are you ready to embark on a new journey?
@@ -95,21 +96,21 @@ const Signup = () => {
             Signup
           </ThemedText>
           <TextInput
-            style={styles.input}
+            style={styles.mobileInput}
             placeholder="Username"
             placeholderTextColor="#aaa"
             value={username}
             onChangeText={setUsername}
           />
           <TextInput
-            style={styles.input}
+            style={styles.mobileInput}
             placeholder="Email"
             placeholderTextColor="#aaa"
             value={email}
             onChangeText={setEmail}
           />
           <TextInput
-            style={styles.input}
+            style={styles.mobileInput}
             placeholder="Password"
             placeholderTextColor="#aaa"
             secureTextEntry
@@ -143,6 +144,74 @@ const Signup = () => {
         </View>
       </View>
     </ThemedView>
+     )
+    } else if(Platform.OS === "web"){
+      return (
+        <ThemedView style={styles.container}>
+          <ThemedText type="title" style={styles.title}>
+            Signup
+          </ThemedText>
+          <View style={styles.animationContainer}>
+            <LottieView
+              source={require("@/assets/animations/suggestSimilar.json")}
+              autoPlay
+              loop
+            />
+          </View>
+          <TextInput
+            style={styles.webInput}
+            placeholder="Username"
+            placeholderTextColor="#aaa"
+            value={username}
+            onChangeText={setUsername}
+          />
+          <TextInput
+            style={styles.webInput}
+            placeholder="Email"
+            placeholderTextColor="#aaa"
+            value={email}
+            onChangeText={setEmail}
+          />
+          <TextInput
+            style={styles.webInput}
+            placeholder="Password"
+            placeholderTextColor="#aaa"
+            secureTextEntry
+            value={password}
+            onChangeText={(text) => {
+              setPassword(text);
+              calculatePasswordStrength(text);
+            }}
+          />
+          <View style={styles.linkContainer}>
+            <TouchableOpacity onPress={suggestPassword}>
+              <Text style={styles.suggestionLink}>Suggest a Password</Text>
+            </TouchableOpacity>
+            {suggestedPassword ? (
+                <View style={styles.suggestedPasswordContainer}>
+                  <Text style={styles.suggestedPassword}>{suggestedPassword}</Text>
+                  <TouchableOpacity onPress={copyToClipboard} style={styles.copyButton}>                    
+                    <FontAwesome6 name="copy" size={14} color="white" />
+                  </TouchableOpacity>
+                </View>
+              ) : null}
+            {password ? (
+              <Text style={styles.passwordStrength}>Password Strength: {passwordStrength}</Text>
+            ) : null}
+          </View>
+
+          <Button title="Signup" onPress={handleSignup} color={"#0F4C75"} />
+          <TouchableOpacity onPress={() => navigation.navigate("login/login")}>
+            <Text style={styles.link}>Already have an account? Login!</Text>
+          </TouchableOpacity>
+        </ThemedView>
+      )
+
+    }
+  }
+
+  return (
+    platform()
   );
 };
 
@@ -192,7 +261,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: "#ffffff",
   },
-  input: {
+  mobileInput: {
     width: "80%",
     height: 40,
     borderColor: "#ccc",
@@ -202,6 +271,17 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: "black",
     backgroundColor: "white",
+  },
+  webInput: {
+    width: "80%",
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 20,
+    color: "#ffffff",
+    backgroundColor: "#2a2a2a",
   },
   linkContainer: {
     marginTop: -10,
@@ -238,5 +318,10 @@ const styles = StyleSheet.create({
   },
   copyButton: {
     marginLeft: 10,
+  },
+  animationContainer: {
+    width: 200,
+    height: 200,
+    marginBottom: 20,
   },
 });
