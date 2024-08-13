@@ -13,9 +13,9 @@ export const GameProvider = ({ children }) => {
     if (!isDataFetched) {
       const fetchGames = async () => {
         setLoading(true);
-        let url = `https://e6aa-94-20-207-112.ngrok-free.app/api/games?page=1&limit=100`; // Fetch a large enough limit to avoid pagination for now
+        let url = `http://139.179.208.27:3000/api/games?page=1&limit=100`; // Fetch a large enough limit to avoid pagination for now
         if (Platform.OS === "android" || Platform.OS === "ios") {
-          url = `https://e6aa-94-20-207-112.ngrok-free.app/api/games?page=1&limit=100`; // Replace with your actual local IP address
+          url = `http://139.179.208.27:3000/api/games?page=1&limit=100`; // Replace with your actual local IP address
         }
         try {
           const response = await fetch(url);

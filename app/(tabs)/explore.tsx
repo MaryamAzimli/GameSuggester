@@ -48,7 +48,7 @@ export default function TabTwoScreen() {
     try {
       const formattedQuery = query.replace(/[^\w\s]/gi, "");
       const response = await fetch(
-        `https://e6aa-94-20-207-112.ngrok-free.app/api/search?q=${formattedQuery}`
+        `http://139.179.208.27:3000/api/search?q=${formattedQuery}`
       );
       const contentType = response.headers.get("content-type");
 

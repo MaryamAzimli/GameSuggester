@@ -107,7 +107,7 @@ const SuggestedGamesPage = () => {
       try {
         const appids = route.params?.appids || [];
         const gamePromises = appids.map((id) =>
-          fetch(`https://e6aa-94-20-207-112.ngrok-free.app/api/games/${id}`)
+          fetch(`http://139.179.208.27:3000/api/games/${id}`)
             .then((response) => response.json())
             .then((data) => ({
               id: data.id,

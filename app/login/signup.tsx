@@ -30,7 +30,7 @@ const Signup = () => {
     }
   
     try {
-      const response = await fetch("https://e6aa-94-20-207-112.ngrok-free.app/api/auth/signup", {
+      const response = await fetch("http://139.179.208.27:3000/api/auth/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

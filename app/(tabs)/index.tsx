@@ -82,7 +82,7 @@ export default function HomeScreen() {
     try {
       const formattedQuery = query.replace(/[^\w\s]/gi, "");
       const response = await fetch(
-        `https://e6aa-94-20-207-112.ngrok-free.app/api/search?q=${formattedQuery}&page=${page}&limit=${limit}`
+        `http://139.179.208.27:3000/api/search?q=${formattedQuery}&page=${page}&limit=${limit}`
       );
       const contentType = response.headers.get("content-type");
 
