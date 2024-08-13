@@ -100,6 +100,11 @@ export default function HomeScreen() {
     }
   };
 
+  const handleClearSearch = () => {
+    setQuery("");
+    setSearchResults([]); // Reset search results
+  };
+
   return (
     <ParallaxScrollView
       headerImage={
@@ -134,16 +139,24 @@ export default function HomeScreen() {
       }
       headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
     >
-      <ThemedView style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search"
-          placeholderTextColor="#ccc"
-          value={query}
-          onChangeText={setQuery}
-          onSubmitEditing={handleSearch}
-        />
-      </ThemedView>
+       <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search"
+            placeholderTextColor="#ccc"
+            value={query}
+            onChangeText={setQuery}
+            onSubmitEditing={handleSearch}
+          />
+          {query.length > 0 && (
+            <TouchableOpacity
+              style={styles.clearButton}
+              onPress={handleClearSearch}
+            >
+              <Ionicons name="close" size={24} color="#ccc" />
+            </TouchableOpacity>
+          )}
+        </View>
       {loading || isSearching ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#fff" />
@@ -254,6 +267,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     color: "#fff",
+  },
+  clearButton: {
+    padding: 10,
   },
   gamesContainer: {
     paddingHorizontal: 20,

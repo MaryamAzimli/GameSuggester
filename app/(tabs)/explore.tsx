@@ -66,6 +66,11 @@ export default function TabTwoScreen() {
     }
   };
 
+  const handleClearSearch = () => {
+    setQuery("");
+    setSearchResults([]); // Reset search results
+  };
+
   const truncateText = (text, length) => {
     return text.length > length ? text.substring(0, length) + "..." : text;
   };
@@ -129,6 +134,14 @@ export default function TabTwoScreen() {
             onChangeText={setQuery}
             onSubmitEditing={handleSearch}
           />
+          {query.length > 0 && (
+            <TouchableOpacity
+              style={styles.clearButton}
+              onPress={handleClearSearch}
+            >
+              <Ionicons name="close" size={24} color="#ccc" />
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             style={styles.filterButton}
             onPress={toggleTagContainer}
@@ -302,6 +315,9 @@ const styles = StyleSheet.create({
     color: "#fff",
     padding: 10,
     borderRadius: 10,
+  },
+  clearButton: {
+    padding: 10,
   },
   filterButton: {
     marginLeft: 10,
