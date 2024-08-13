@@ -17,15 +17,12 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));
 
+app.use(cors({
+    origin: ['http://localhost:8081'], 
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
-  const corsOptions = {
-    origin: '*', // or specify your mobile app's origin here
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true, // if you're using cookies for authentication
-    optionsSuccessStatus: 204
-  };
-  app.use(cors(corsOptions));
-  
 app.use(express.json());
 
 // Initialize OAuth Client
@@ -33,10 +30,15 @@ const credentials = JSON.parse(fs.readFileSync('credentials.json', 'utf8')); // 
 let oAuth2Client = initializeOAuthClient(credentials);
 const fileId = '1l7lbMzTwMRDmpy_rr3HKX3qsOcOkCuyH';
 
+
 // Initialize cached data at server startup
+let cachedGameData = []; // Declare cachedGameData
 authorizeAndDownloadFile(oAuth2Client, fileId, (data) => {
+  cachedGameData = data; // Assign data to cachedGameData
   console.log('Initial game data fetched and cached');
 });
+
+
 
 // Use routes
 app.use('/api', gameRoutes);
@@ -46,14 +48,9 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
-
-
 app.get('/api/games/:id', (req, res) => {
   const gameId = req.params.id;
-  if (cachedGameData) {
+  if (cachedGameData.length > 0) {
     const game = cachedGameData.find(g => g.id === gameId);
     if (game) {
       res.json(game);
@@ -64,3 +61,9 @@ app.get('/api/games/:id', (req, res) => {
     res.status(500).send('Game data is not available');
   }
 });
+
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
+
+

@@ -8,6 +8,7 @@ import {
   Platform,
   Alert,
   Text,
+  ActivityIndicator,
 } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
@@ -37,6 +38,7 @@ const GameCard = () => {
   const { game } = route.params;
   const [liked, setLiked] = useState(false);
   const [tagColors, setTagColors] = useState({});
+  const [loading, setLoading] = useState(false); // Loading of suggest similar
   const initialTagColor = "transparent";
   const navigation = useNavigation();
 
@@ -88,32 +90,32 @@ const GameCard = () => {
   };
 
   const handleSuggestClick = () => {
+    if (loading) return; // Prevent multiple requests
 
     const selectedTags = Object.keys(tagColors).filter(
       (tag) => tagColors[tag] !== initialTagColor
     );
 
+    const appid = parseInt(game.id, 10);
 
-     // Ensure appid is a valid integer
-  const appid = parseInt(game.id, 10);
-
-  // Check if appid is a number and greater than zero
-  if (isNaN(appid) || appid <= 0) {
-    console.error("Invalid appid:", game.appid);
-    return;
-  }
+    if (isNaN(appid) || appid <= 0) {
+      console.error("Invalid appid:", game.id);
+      return;
+    }
 
     const payload = {
       appid: appid,
       tags: selectedTags,
     };
 
+    setLoading(true); // Start loading
+
     fetch("https://ep4js2tqr3bhiy3m3xoqyydkim0qrvvg.lambda-url.eu-west-2.on.aws/suggestions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      mode: "cors", 
+      mode: "cors",
       body: JSON.stringify(payload),
     })
       .then((response) => response.json())
@@ -124,6 +126,10 @@ const GameCard = () => {
       })
       .catch((error) => {
         console.error("Error:", error);
+        Alert.alert("Error", "Failed to fetch suggestions. Please try again.");
+      })
+      .finally(() => {
+        setLoading(false); // Stop loading
       });
   };
 
@@ -267,6 +273,7 @@ const GameCard = () => {
         <TouchableOpacity
           style={styles.suggestButton}
           onPress={handleSuggestClick}
+          disabled={loading}
         >
           <LinearGradient
             colors={["#8E2DE2", "#4A00E0", "#FF0080"]}
@@ -274,9 +281,13 @@ const GameCard = () => {
             end={{ x: 1, y: 1 }}
             style={styles.gradient}
           >
-            <ThemedText style={styles.suggestButtonText}>
-              Suggest Similar
-            </ThemedText>
+           {loading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <ThemedText style={styles.suggestButtonText}>
+                Get Suggestions
+              </ThemedText>
+            )}
           </LinearGradient>
         </TouchableOpacity>
       </View>
