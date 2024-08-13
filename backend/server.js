@@ -17,7 +17,15 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));
 
-app.use(cors());
+
+  const corsOptions = {
+    origin: '*', // or specify your mobile app's origin here
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true, // if you're using cookies for authentication
+    optionsSuccessStatus: 204
+  };
+  app.use(cors(corsOptions));
+  
 app.use(express.json());
 
 // Initialize OAuth Client
