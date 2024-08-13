@@ -38,8 +38,6 @@ authorizeAndDownloadFile(oAuth2Client, fileId, (data) => {
   console.log('Initial game data fetched and cached');
 });
 
-
-
 // Use routes
 app.use('/api', gameRoutes);
 app.use('/api/auth', authRoutes);
@@ -65,6 +63,3 @@ app.get('/api/games/:id', (req, res) => {
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server is running on https://localhost:${port}`);
 });
-
-
-

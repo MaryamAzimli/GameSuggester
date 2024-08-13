@@ -25,11 +25,14 @@ const getNewToken = (oAuth2Client, fileId, callback) => {
         rl.close();
         oAuth2Client.getToken(code, (err, token) => {
             if (err) {
+                console.error('Error retrieving access token', err);
                 return;
             }
             oAuth2Client.setCredentials(token);
             fs.writeFile('token.json', JSON.stringify(token), (err) => {
-                if (err) return;
+                if (err) {
+                    console.error('Error saving token', err);
+                }
             });
             callback(oAuth2Client, fileId);
         });
@@ -44,6 +47,7 @@ const downloadFile = (auth, fileId, callback) => {
         { responseType: 'stream' },
         (err, res) => {
             if (err) {
+                console.error('Error downloading file', err);
                 return;
             }
             let data = '';
@@ -53,7 +57,7 @@ const downloadFile = (auth, fileId, callback) => {
                     callback(data);
                 })
                 .on('error', (err) => {
-                    console.log('Error reading file:', err.message);
+                    console.error('Error reading file:', err.message);
                 });
         }
     );
@@ -68,6 +72,7 @@ const extractGameData = (jsonData) => {
             ...gameData[gameId]
         }));
     } catch (error) {
+        console.error('Error parsing JSON data', error);
         return [];
     }
 };

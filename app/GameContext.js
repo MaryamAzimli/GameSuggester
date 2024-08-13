@@ -1,5 +1,8 @@
-import React, { createContext, useState, useEffect } from "react";
-import { Platform } from "react-native";
+import React, { createContext, useState, useEffect } from 'react';
+import Constants from 'expo-constants';
+
+const { BASE_URL } = Constants.expoConfig?.extra || {};
+console.log('BASE_URL:', BASE_URL);
 
 const GameContext = createContext();
 
@@ -13,10 +16,7 @@ export const GameProvider = ({ children }) => {
     if (!isDataFetched) {
       const fetchGames = async () => {
         setLoading(true);
-        let url = `http://139.179.208.27:3000/api/games?page=1&limit=100`; // Fetch a large enough limit to avoid pagination for now
-        if (Platform.OS === "android" || Platform.OS === "ios") {
-          url = `http://139.179.208.27:3000/api/games?page=1&limit=100`; // Replace with your actual local IP address
-        }
+        let url = `${BASE_URL}/api/games?page=1&limit=100`;
         try {
           const response = await fetch(url);
           if (!response.ok) {
@@ -31,7 +31,7 @@ export const GameProvider = ({ children }) => {
           setTopReviewedGames(sortedGames);
           setIsDataFetched(true);
         } catch (error) {
-          console.error("Failed to fetch games:", error);
+          console.error('Failed to fetch games:', error.message);
         } finally {
           setLoading(false);
         }

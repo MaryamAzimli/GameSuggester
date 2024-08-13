@@ -1,17 +1,14 @@
 import React, { useEffect, useState } from "react";
-import {
-  StyleSheet,
-  View,
-  TextInput,
-  Button,
-  Text,
-  TouchableOpacity,
-} from "react-native";
+import { StyleSheet, View, TextInput, Button, Text, TouchableOpacity } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useNavigation } from "expo-router";
 import LottieView from "lottie-react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants'; // Import Constants
+
+const { BASE_URL } = Constants.expoConfig?.extra || {}; // Access BASE_URL from app.json
+
 
 const Login = () => {
   const navigation = useNavigation();
@@ -19,9 +16,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
 
   useEffect(() => {
-    navigation.setOptions({
-      headerShown: false,
-    });
+    navigation.setOptions({ headerShown: false });
   }, [navigation]);
 
   const handleLogin = async () => {
@@ -31,7 +26,7 @@ const Login = () => {
     }
   
     try {
-      const response = await fetch("http://139.179.208.27:3000/api/auth/login", {
+      const response = await fetch(`${BASE_URL}/api/auth/login`, { // Use BASE_URL from app.json
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -41,21 +36,21 @@ const Login = () => {
   
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || 'Login failed');
+        throw new Error(data.error || `HTTP error! Status: ${response.status}`);
       }
   
       const data = await response.json();
       console.log("Login successful:", data);
-      await AsyncStorage.setItem('token', data.token); // Save token to local storage
-      await AsyncStorage.setItem('user', JSON.stringify(data.user)); // Save user info to local storage
+      await AsyncStorage.setItem('token', data.token);
+      await AsyncStorage.setItem('user', JSON.stringify(data.user));
       alert("Login successful");
-      // Navigate to the home screen or other protected route
       navigation.navigate("home");
     } catch (error) {
       console.error("Error during login:", error);
       alert("Login failed: " + error.message);
     }
   };
+  
   
   return (
     <ThemedView style={styles.container}>
