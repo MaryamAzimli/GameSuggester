@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Image,
@@ -30,6 +30,8 @@ import monster from "@/assets/defaultProfiles/monster.png";
 import ninja from "@/assets/defaultProfiles/ninja.png";
 import pirate from "@/assets/defaultProfiles/pirate.png";
 import superHero from "@/assets/defaultProfiles/superHero.png";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const ProfilePage = () => {
   const [selectedTab, setSelectedTab] = useState("Games");
@@ -49,6 +51,17 @@ const ProfilePage = () => {
   const [deleteListIndex, setDeleteListIndex] = useState(null);
   const [profilePicModalVisible, setProfilePicModalVisible] = useState(false);
   const [selectedProfilePic, setSelectedProfilePic] = useState(elf);
+  const [username, setUsername] = useState("");
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const user = await AsyncStorage.getItem('user');
+      if (user) {
+        setUsername(JSON.parse(user).username);
+      }
+    };
+    fetchUserData();
+  }, []);
 
   const handleProfilePicPress = () => {
     setProfilePicModalVisible(true);
@@ -234,8 +247,7 @@ const ProfilePage = () => {
           <TouchableOpacity onPress={handleProfilePicPress}>
             <Image source={selectedProfilePic} style={styles.profileImage} />
           </TouchableOpacity>
-
-          <ThemedText type="title">Octo the Gamer</ThemedText>
+          <ThemedText type="title">{username}</ThemedText>
           <View style={styles.statsContainer}>
             <TouchableOpacity
               style={styles.statItem}

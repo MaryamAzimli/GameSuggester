@@ -11,6 +11,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useNavigation } from "expo-router";
 import LottieView from "lottie-react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Login = () => {
   const navigation = useNavigation();
@@ -19,17 +20,43 @@ const Login = () => {
 
   useEffect(() => {
     navigation.setOptions({
-      //headerTitle: "Login",
-      //headerLeft: () => null, // this hides the back button
       headerShown: false,
     });
   }, [navigation]);
 
-  const handleLogin = () => {
-    console.log("Username:", username);
-    console.log("Password:", password);
+  const handleLogin = async () => {
+    if (username.trim() === "" || password.trim() === "") {
+      alert("Please enter both username and password.");
+      return;
+    }
+  
+    try {
+      const response = await fetch("https://e6aa-94-20-207-112.ngrok-free.app/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+  
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Login failed');
+      }
+  
+      const data = await response.json();
+      console.log("Login successful:", data);
+      await AsyncStorage.setItem('token', data.token); // Save token to local storage
+      await AsyncStorage.setItem('user', JSON.stringify(data.user)); // Save user info to local storage
+      alert("Login successful");
+      // Navigate to the home screen or other protected route
+      navigation.navigate("home");
+    } catch (error) {
+      console.error("Error during login:", error);
+      alert("Login failed: " + error.message);
+    }
   };
-
+  
   return (
     <ThemedView style={styles.container}>
       <ThemedText type="title" style={styles.title}>

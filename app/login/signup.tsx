@@ -19,19 +19,37 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSignup = () => {
-    console.log("Username:", username);
-    console.log("Email:", email);
-    console.log("Password:", password);
+  const handleSignup = async () => {
+    if (username.trim() === "" || email.trim() === "" || password.trim() === "") {
+      alert("Please fill in all fields.");
+      return;
+    }
+  
+    try {
+      const response = await fetch("https://e6aa-94-20-207-112.ngrok-free.app/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, email, password }),
+      });
+  
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Signup failed');
+      }
+  
+      const data = await response.json();
+      console.log("Signup successful:", data);
+      alert("Signup successful");
+      navigation.navigate("login/login");
+    } catch (error) {
+      console.error("Error during signup:", error);
+      alert("Signup failed: " + error.message);
+    }
   };
+  
 
-  useEffect(() => {
-    navigation.setOptions({
-      //headerTitle: "Login",
-      //headerLeft: () => null, // this hides the back button
-      headerShown: false,
-    });
-  }, [navigation]);
 
   return (
     <ThemedView style={styles.container}>
