@@ -107,7 +107,7 @@ const SuggestedGamesPage = () => {
       try {
         const appids = route.params?.appids || [];
         const gamePromises = appids.map((id) =>
-          fetch(`http://192.168.0.183:3000/api/games/${id}`)
+          fetch(`https://e6aa-94-20-207-112.ngrok-free.app/api/games/${id}`)
             .then((response) => response.json())
             .then((data) => ({
               id: data.id,
@@ -139,7 +139,7 @@ const SuggestedGamesPage = () => {
           </ThemedText>
           <TouchableOpacity
             style={styles.goBackButton}
-            onPress={() => navigation.navigate("/")}
+            onPress={() =>  navigation.goBack()}
           >
             <ThemedText style={styles.goBackText}>Go Back!</ThemedText>
           </TouchableOpacity>
