@@ -38,7 +38,7 @@ const Signup = () => {
     }
 
     try {
-      const response = await fetch(`${BASE_URL}/api/auth/login`, { // Use BASE_URL from app.json
+      const response = await fetch(`${BASE_URL}/api/auth/signup`, { // Use BASE_URL from app.json
         method: "POST",
         headers: {
           "Content-Type": "application/json",

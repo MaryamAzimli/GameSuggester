@@ -27,6 +27,27 @@ const SuggestedGamesPage = () => {
   const [colorAnimation] = useState(new Animated.Value(0));
   const [games, setGames] = useState<any[]>([]);
   const position = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
+  const [overlayVisible, setOverlayVisible] = useState(false);
+  const [overlayContent, setOverlayContent] = useState({ color: "", icon: "" });
+  const overlayOpacity = useRef(new Animated.Value(0)).current;
+
+  const triggerOverlay = (icon, color) => {
+    setOverlayContent({ icon, color });
+
+    Animated.sequence([
+      Animated.timing(overlayOpacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(overlayOpacity, {
+        toValue: 0,
+        duration: 300,
+        delay: 300,
+        useNativeDriver: true,
+      })
+    ]).start();
+};
 
   const panResponder = useRef(
     PanResponder.create({
@@ -37,28 +58,36 @@ const SuggestedGamesPage = () => {
       ),
       onPanResponderRelease: (e, gestureState) => {
         if (gestureState.dx > 120) {
-          forceSwipe("right");
+            forceSwipe("right");
         } else if (gestureState.dx < -120) {
-          forceSwipe("left");
+            forceSwipe("left");
         } else {
-          resetPosition();
+            resetPosition();
         }
-      },
+    },
     })
   ).current;
 
   const forceSwipe = (direction) => {
     const x = direction === "right" ? screenWidth : -screenWidth;
+    
     Animated.timing(position, {
       toValue: { x, y: 0 },
       duration: 250,
       useNativeDriver: false,
-    }).start(() => onSwipeComplete());
-  };
+    }).start(() => onSwipeComplete(direction));
+};
 
-  const onSwipeComplete = () => {
-    setGames((prevGames) => prevGames.slice(1));
-    position.setValue({ x: 0, y: 0 });
+  const onSwipeComplete = (direction) => {
+    const icon = direction === "right" ? "heart" : "circle-with-cross";
+    const color = direction === "right" ? "rgba(255,0,0,0.8)" : "rgba(0,0,0,0.8)";
+    
+    triggerOverlay(icon, color);
+  
+    setTimeout(() => {
+      setGames((prevGames) => prevGames.slice(1));
+      position.setValue({ x: 0, y: 0 });
+    }, 1000);
   };
 
   const resetPosition = () => {
@@ -83,6 +112,14 @@ const SuggestedGamesPage = () => {
       ],
     };
   };
+
+  const renderOverlay = () => {
+    return (
+      <Animated.View pointerEvents="none" style={[styles.overlay, { backgroundColor: overlayContent.color, opacity: overlayOpacity }]}>
+        <Entypo name={overlayContent.icon} size={100} color="#FFF" />
+      </Animated.View>
+    );
+};
 
   useEffect(() => {
     const startAnimation = () => {
@@ -115,7 +152,7 @@ const SuggestedGamesPage = () => {
             .then((data) => ({
               id: data.id,
               name: data.name,
-              image: data.header_image || "/assets/defaultProfiles/default.png", // Placeholder image path
+              image: data.header_image || "/assets/defaultProfiles/default.png",
             }))
         );
         const fetchedGames = await Promise.all(gamePromises);
@@ -159,7 +196,7 @@ const SuggestedGamesPage = () => {
                 styles.card,
                 { zIndex: games.length - index, top: -3 },
               ]
-            : [styles.card, { top: index * 10, zIndex: games.length - index }];
+            : [styles.card, { top: index, zIndex: games.length - index }];
 
         return (
           <Animated.View
@@ -187,6 +224,7 @@ const SuggestedGamesPage = () => {
   return (
     <Animated.View style={[styles.container, { backgroundColor }]}>
       <View style={styles.cardContainer}>{renderCards()}</View>
+      {renderOverlay()}
       <View style={styles.lottieContainer}>
         <LottieView
           source={require("@/assets/animations/rainbow.json")}
@@ -219,32 +257,38 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: screenWidth * 0.8,
     height: screenHeight * 0.6,
-    backgroundColor: "#FFF",
-    borderRadius: 20,
+    borderRadius: 25, 
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.5,
+    shadowRadius: 6,
+    elevation: 10,
+    backgroundColor: "#FFF",
+    padding: 20, 
   },
   gameImage: {
-    width: "90%",
-    height: "75%",
+    width: "100%",
+    height: "40%",
     borderRadius: 15,
+    marginBottom: 100,
+    overlayColor: "rgba(0,0,0,0.3)", 
   },
   gameName: {
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
     marginTop: 10,
+    color: "black",
   },
   cardActions: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    width: "60%",
-    marginTop: 10,
+    justifyContent: "space-between",
+    width: "100%",
+    margin: 10,
+    paddingVertical: 10, 
+    borderRadius: 10,  
   },
   lottieContainer: {
     position: "absolute",
@@ -279,5 +323,16 @@ const styles = StyleSheet.create({
   goBackText: {
     fontSize: 20,
     color: "#000",
+  },
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+    backgroundColor: "rgba(0,0,0,0.8)",
   },
 });
