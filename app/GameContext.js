@@ -8,7 +8,7 @@ const GameContext = createContext();
 
 export const GameProvider = ({ children }) => {
   const [games, setGames] = useState([]);
-  const [topReviewedGames, setTopReviewedGames] = useState([]);
+  const [topGames, setTopGames] = useState([]);
   const [isDataFetched, setIsDataFetched] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -26,9 +26,16 @@ export const GameProvider = ({ children }) => {
           setGames(data);
 
           const sortedGames = data
-            .sort((a, b) => b.reviews.length - a.reviews.length)
+            .sort((a, b) => {
+              // Sort by positive reviews in descending order
+              const positiveComparison = b.positive - a.positive;
+              if (positiveComparison !== 0) return positiveComparison;
+
+              // If positive reviews are equal, sort by negative reviews in ascending order
+              return a.negative - b.negative;
+            })
             .slice(0, 5);
-          setTopReviewedGames(sortedGames);
+          setTopGames(sortedGames);
           setIsDataFetched(true);
         } catch (error) {
           console.error('Failed to fetch games:', error.message);
@@ -42,7 +49,7 @@ export const GameProvider = ({ children }) => {
   }, [isDataFetched]);
 
   return (
-    <GameContext.Provider value={{ games, topReviewedGames, loading }}>
+    <GameContext.Provider value={{ games, topGames, loading }}>
       {children}
     </GameContext.Provider>
   );

@@ -85,4 +85,35 @@ router.get('/search', (req, res) => {
     }
 });
 
+router.get('/games/:id', (req, res) => {
+  const gameId = req.params.id;
+  
+  try {
+      const cachedGameData = getCachedGameData();
+      if (cachedGameData && cachedGameData.length > 0) {
+          const game = cachedGameData.find(g => g.id === gameId);
+          if (game) {
+              res.json(game);
+          } else {
+              res.status(404).send('Game not found');
+          }
+      } else if (shouldFetchFromDrive()) {
+          authorizeAndDownloadFile(oAuth2Client, fileId, (data) => {
+              const game = data.find(g => g.id === gameId);
+              if (game) {
+                  res.json(game);
+              } else {
+                  res.status(404).send('Game not found');
+              }
+          });
+      } else {
+          res.status(500).send('Game data is not available');
+      }
+  } catch (error) {
+      console.error('Error handling /games/:id request:', error);
+      res.status(500).send('Failed to process request');
+  }
+});
+
+
 module.exports = router;
