@@ -71,7 +71,7 @@ export default function TabTwoScreen() {
 
   const handleClearSearch = () => {
     setQuery("");
-    setSearchResults([]); // Reset search results
+    setSearchResults([]);
   };
 
   const truncateText = (text, length) => {
@@ -135,22 +135,24 @@ export default function TabTwoScreen() {
             color="#ccc"
             style={styles.searchIcon}
           />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search"
-            placeholderTextColor="#ccc"
-            value={query}
-            onChangeText={setQuery}
-            onSubmitEditing={handleSearch}
-          />
-          {query.length > 0 && (
-            <TouchableOpacity
-              style={styles.clearButton}
-              onPress={handleClearSearch}
-            >
-              <Ionicons name="close" size={24} color="#ccc" />
-            </TouchableOpacity>
-          )}
+          <View style={styles.clearGroup}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search"
+              placeholderTextColor="#ccc"
+              value={query}
+              onChangeText={setQuery}
+              onSubmitEditing={handleSearch}
+            />
+            {query.length > 0 && (
+              <TouchableOpacity
+                style={styles.clearButton}
+                onPress={handleClearSearch}
+              >
+                <Ionicons name="close" size={24} color="white" />
+              </TouchableOpacity>
+            )}
+          </View>
           <TouchableOpacity
             style={styles.filterButton}
             onPress={toggleTagContainer}
@@ -315,18 +317,28 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
   },
+  clearGroup:{
+    flex: 1,
+    position: 'relative',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
   searchIcon: {
     marginRight: 10,
   },
   searchInput: {
-    flex: 1,
-    backgroundColor: "#333",
-    color: "#fff",
+    backgroundColor: "#444",
+    borderRadius: 8,
     padding: 10,
-    borderRadius: 10,
+    paddingRight: 40,
+    color: "#fff",
   },
   clearButton: {
-    padding: 10,
+    position: 'absolute',
+    right: 30, 
+    top: '40%',
+    transform: [{ translateY: -12 }],
+    padding: 5,
   },
   filterButton: {
     marginLeft: 10,
@@ -400,4 +412,5 @@ const styles = StyleSheet.create({
   readMoreText: {
     color: "#87C4FF",
   },
+
 });
