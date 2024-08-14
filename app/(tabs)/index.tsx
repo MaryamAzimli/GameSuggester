@@ -17,7 +17,10 @@ import { ThemedText } from "@/components/ThemedText";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import GameContext from "../GameContext";
 import { Game } from "./types";
+import Constants from 'expo-constants';
 
+const { BASE_URL } = Constants.expoConfig?.extra || {};
+console.log('BASE_URL:', BASE_URL);
 const HEADER_IMAGE = require("@/assets/defaultProfiles/elf.png");
 
 type RootStackParamList = {
@@ -82,7 +85,7 @@ export default function HomeScreen() {
     try {
       const formattedQuery = query.replace(/[^\w\s]/gi, "");
       const response = await fetch(
-        `http://139.179.208.27:3000/api/search?q=${formattedQuery}&page=${page}&limit=${limit}`
+        `${BASE_URL}/api/search?q=${formattedQuery}&page=${page}&limit=${limit}`
       );
       const contentType = response.headers.get("content-type");
 

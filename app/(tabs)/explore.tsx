@@ -19,7 +19,10 @@ import { useNavigation } from "@react-navigation/native";
 import { useWindowDimensions } from "react-native";
 import { Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import Constants from 'expo-constants';
 
+const { BASE_URL } = Constants.expoConfig?.extra || {};
+console.log('BASE_URL:', BASE_URL);
 export default function TabTwoScreen() {
   const isMobile = useMediaQuery({ maxWidth: 767 });
   const { games, topReviewedGames, loading } = useContext(GameContext);
@@ -48,7 +51,7 @@ export default function TabTwoScreen() {
     try {
       const formattedQuery = query.replace(/[^\w\s]/gi, "");
       const response = await fetch(
-        `http://139.179.208.27:3000/api/search?q=${formattedQuery}`
+        `${BASE_URL}L/api/search?q=${formattedQuery}`
       );
       const contentType = response.headers.get("content-type");
 
