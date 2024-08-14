@@ -51,7 +51,7 @@ export default function TabTwoScreen() {
     try {
       const formattedQuery = query.replace(/[^\w\s]/gi, "");
       const response = await fetch(
-        `${BASE_URL}L/api/search?q=${formattedQuery}`
+        `${BASE_URL}/api/search?q=${formattedQuery}`
       );
       const contentType = response.headers.get("content-type");
 
