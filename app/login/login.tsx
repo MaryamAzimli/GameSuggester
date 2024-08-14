@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from "react";
-import {
-  StyleSheet,
-  View,
-  TextInput,
-  Button,
-  Text,
-  TouchableOpacity,
-} from "react-native";
+import { StyleSheet, View, TextInput, Button, Text, TouchableOpacity } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useNavigation } from "expo-router";
 import LottieView from "lottie-react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants'; // Import Constants
+
+const { BASE_URL } = Constants.expoConfig?.extra || {}; // Access BASE_URL from app.json
+
 
 const Login = () => {
   const navigation = useNavigation();
@@ -18,18 +16,42 @@ const Login = () => {
   const [password, setPassword] = useState("");
 
   useEffect(() => {
-    navigation.setOptions({
-      //headerTitle: "Login",
-      //headerLeft: () => null, // this hides the back button
-      headerShown: false,
-    });
+    navigation.setOptions({ headerShown: false });
   }, [navigation]);
 
-  const handleLogin = () => {
-    console.log("Username:", username);
-    console.log("Password:", password);
+  const handleLogin = async () => {
+    if (username.trim() === "" || password.trim() === "") {
+      alert("Please enter both username and password.");
+      return;
+    }
+  
+    try {
+      const response = await fetch(`${BASE_URL}/api/auth/login`, { // Use BASE_URL from app.json
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+  
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || `HTTP error! Status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      console.log("Login successful:", data);
+      await AsyncStorage.setItem('token', data.token);
+      await AsyncStorage.setItem('user', JSON.stringify(data.user));
+      alert("Login successful");
+      navigation.navigate("home");
+    } catch (error) {
+      console.error("Error during login:", error);
+      alert("Login failed: " + error.message);
+    }
   };
-
+  
+  
   return (
     <ThemedView style={styles.container}>
       <ThemedText type="title" style={styles.title}>

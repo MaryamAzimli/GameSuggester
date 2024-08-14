@@ -14,7 +14,10 @@ import { ThemedText } from "@/components/ThemedText";
 import LottieView from "lottie-react-native";
 import Entypo from "@expo/vector-icons/Entypo";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import Constants from 'expo-constants';
 
+const { BASE_URL } = Constants.expoConfig?.extra || {};
+console.log('BASE_URL:', BASE_URL);
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 
@@ -107,7 +110,7 @@ const SuggestedGamesPage = () => {
       try {
         const appids = route.params?.appids || [];
         const gamePromises = appids.map((id) =>
-          fetch(`http://192.168.0.128:3000/api/games/${id}`)
+          fetch(`${BASE_URL}/api/games/${id}`)
             .then((response) => response.json())
             .then((data) => ({
               id: data.id,
@@ -139,7 +142,7 @@ const SuggestedGamesPage = () => {
           </ThemedText>
           <TouchableOpacity
             style={styles.goBackButton}
-            onPress={() => navigation.navigate("/")}
+            onPress={() =>  navigation.goBack()}
           >
             <ThemedText style={styles.goBackText}>Go Back!</ThemedText>
           </TouchableOpacity>

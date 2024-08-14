@@ -19,7 +19,10 @@ import { useNavigation } from "@react-navigation/native";
 import { useWindowDimensions } from "react-native";
 import { Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import Constants from 'expo-constants';
 
+const { BASE_URL } = Constants.expoConfig?.extra || {};
+console.log('BASE_URL:', BASE_URL);
 export default function TabTwoScreen() {
   const isMobile = useMediaQuery({ maxWidth: 767 });
   const { games, topReviewedGames, loading } = useContext(GameContext);
@@ -48,7 +51,7 @@ export default function TabTwoScreen() {
     try {
       const formattedQuery = query.replace(/[^\w\s]/gi, "");
       const response = await fetch(
-        `http://localhost:3000/api/search?q=${formattedQuery}`
+        `${BASE_URL}L/api/search?q=${formattedQuery}`
       );
       const contentType = response.headers.get("content-type");
 
@@ -64,6 +67,11 @@ export default function TabTwoScreen() {
     } finally {
       setIsSearching(false);
     }
+  };
+
+  const handleClearSearch = () => {
+    setQuery("");
+    setSearchResults([]); // Reset search results
   };
 
   const truncateText = (text, length) => {
@@ -129,6 +137,14 @@ export default function TabTwoScreen() {
             onChangeText={setQuery}
             onSubmitEditing={handleSearch}
           />
+          {query.length > 0 && (
+            <TouchableOpacity
+              style={styles.clearButton}
+              onPress={handleClearSearch}
+            >
+              <Ionicons name="close" size={24} color="#ccc" />
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             style={styles.filterButton}
             onPress={toggleTagContainer}
@@ -302,6 +318,9 @@ const styles = StyleSheet.create({
     color: "#fff",
     padding: 10,
     borderRadius: 10,
+  },
+  clearButton: {
+    padding: 10,
   },
   filterButton: {
     marginLeft: 10,

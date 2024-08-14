@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -14,6 +14,10 @@ import { useNavigation } from "expo-router";
 import LottieView from "lottie-react-native";
 import * as Clipboard from 'expo-clipboard';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import Constants from 'expo-constants'; // Import Constants
+
+const { BASE_URL } = Constants.expoConfig?.extra || {}; // Access BASE_URL from app.json
+
 
 const Signup = () => {
   const navigation = useNavigation();
@@ -23,19 +27,35 @@ const Signup = () => {
   const [passwordStrength, setPasswordStrength] = useState("");
   const [suggestedPassword, setSuggestedPassword] = useState("");
 
-  const handleSignup = () => {
-    console.log("Username:", username);
-    console.log("Email:", email);
-    console.log("Password:", password);
-  };
+  const handleSignup = async () => {
+    if (username.trim() === "" || email.trim() === "" || password.trim() === "") {
+      alert("Please fill in all fields.");
+      return;
+    }
 
-  useEffect(() => {
-    navigation.setOptions({
-      //headerTitle: "Login",
-      //headerLeft: () => null, // this hides the back button
-      headerShown: false,
-    });
-  }, [navigation]);
+    try {
+      const response = await fetch(`${BASE_URL}/api/auth/login`, { // Use BASE_URL from app.json
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Signup failed');
+      }
+
+      const data = await response.json();
+      console.log("Signup successful:", data);
+      alert("Signup successful");
+      navigation.navigate("login/login");
+    } catch (error) {
+      console.error("Error during signup:", error);
+      alert("Signup failed: " + error.message);
+    }
+  };
 
   const calculatePasswordStrength = (password) => {
     let strength = "Weak";
@@ -78,73 +98,73 @@ const Signup = () => {
 
   const platform = () => {
     if(Platform.OS === "android" || Platform.OS === "ios"){
-     return(
-      <ThemedView style={styles.container}>
-        <LottieView
-          source={require("@/assets/animations/train.json")}
-          autoPlay
-          loop
-          style={styles.animation}
-        />
+      return(
+        <ThemedView style={styles.container}>
+          <LottieView
+            source={require("@/assets/animations/train.json")}
+            autoPlay
+            loop
+            style={styles.animation}
+          />
 
-      <View style={styles.blurContainer}>
-        <ThemedText type="title" style={styles.subtitle}>
-          Are you ready to embark on a new journey?
-        </ThemedText>
-        <View style={styles.box}>
-          <ThemedText type="title" style={styles.title}>
-            Signup
-          </ThemedText>
-          <TextInput
-            style={styles.mobileInput}
-            placeholder="Username"
-            placeholderTextColor="#aaa"
-            value={username}
-            onChangeText={setUsername}
-          />
-          <TextInput
-            style={styles.mobileInput}
-            placeholder="Email"
-            placeholderTextColor="#aaa"
-            value={email}
-            onChangeText={setEmail}
-          />
-          <TextInput
-            style={styles.mobileInput}
-            placeholder="Password"
-            placeholderTextColor="#aaa"
-            secureTextEntry
-            value={password}
-            onChangeText={(text) => {
-              setPassword(text);
-              calculatePasswordStrength(text);
-            }}
-          />
-          <View style={styles.linkContainer}>
-            <TouchableOpacity onPress={suggestPassword}>
-              <Text style={styles.suggestionLink}>Suggest a Password</Text>
-            </TouchableOpacity>
-            {suggestedPassword ? (
-                <View style={styles.suggestedPasswordContainer}>
-                  <Text style={styles.suggestedPassword}>{suggestedPassword}</Text>
-                  <TouchableOpacity onPress={copyToClipboard} style={styles.copyButton}>                    
-                    <FontAwesome6 name="copy" size={14} color="black" />
-                  </TouchableOpacity>
-                </View>
-              ) : null}
-            {password ? (
-              <Text style={styles.passwordStrength}>Password Strength: {passwordStrength}</Text>
-            ) : null}
+          <View style={styles.blurContainer}>
+            <ThemedText type="title" style={styles.subtitle}>
+              Are you ready to embark on a new journey?
+            </ThemedText>
+            <View style={styles.box}>
+              <ThemedText type="title" style={styles.title}>
+                Signup
+              </ThemedText>
+              <TextInput
+                style={styles.mobileInput}
+                placeholder="Username"
+                placeholderTextColor="#aaa"
+                value={username}
+                onChangeText={setUsername}
+              />
+              <TextInput
+                style={styles.mobileInput}
+                placeholder="Email"
+                placeholderTextColor="#aaa"
+                value={email}
+                onChangeText={setEmail}
+              />
+              <TextInput
+                style={styles.mobileInput}
+                placeholder="Password"
+                placeholderTextColor="#aaa"
+                secureTextEntry
+                value={password}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  calculatePasswordStrength(text);
+                }}
+              />
+              <View style={styles.linkContainer}>
+                <TouchableOpacity onPress={suggestPassword}>
+                  <Text style={styles.suggestionLink}>Suggest a Password</Text>
+                </TouchableOpacity>
+                {suggestedPassword ? (
+                  <View style={styles.suggestedPasswordContainer}>
+                    <Text style={styles.suggestedPassword}>{suggestedPassword}</Text>
+                    <TouchableOpacity onPress={copyToClipboard} style={styles.copyButton}>                    
+                      <FontAwesome6 name="copy" size={14} color="black" />
+                    </TouchableOpacity>
+                  </View>
+                ) : null}
+                {password ? (
+                  <Text style={styles.passwordStrength}>Password Strength: {passwordStrength}</Text>
+                ) : null}
+              </View>
+
+              <Button title="Signup" onPress={handleSignup} color={"#0F4C75"} />
+              <TouchableOpacity onPress={() => navigation.navigate("login/login")}>
+                <Text style={styles.link}>Already have an account? Login!</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-
-          <Button title="Signup" onPress={handleSignup} color={"#0F4C75"} />
-          <TouchableOpacity onPress={() => navigation.navigate("login/login")}>
-            <Text style={styles.link}>Already have an account? Login!</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </ThemedView>
-     )
+        </ThemedView>
+      );
     } else if(Platform.OS === "web"){
       return (
         <ThemedView style={styles.container}>
@@ -188,13 +208,13 @@ const Signup = () => {
               <Text style={styles.suggestionLink}>Suggest a Password</Text>
             </TouchableOpacity>
             {suggestedPassword ? (
-                <View style={styles.suggestedPasswordContainer}>
-                  <Text style={styles.suggestedPassword}>{suggestedPassword}</Text>
-                  <TouchableOpacity onPress={copyToClipboard} style={styles.copyButton}>                    
-                    <FontAwesome6 name="copy" size={14} color="white" />
-                  </TouchableOpacity>
-                </View>
-              ) : null}
+              <View style={styles.suggestedPasswordContainer}>
+                <Text style={styles.suggestedPassword}>{suggestedPassword}</Text>
+                <TouchableOpacity onPress={copyToClipboard} style={styles.copyButton}>                    
+                  <FontAwesome6 name="copy" size={14} color="white" />
+                </TouchableOpacity>
+              </View>
+            ) : null}
             {password ? (
               <Text style={styles.passwordStrength}>Password Strength: {passwordStrength}</Text>
             ) : null}
@@ -205,10 +225,9 @@ const Signup = () => {
             <Text style={styles.link}>Already have an account? Login!</Text>
           </TouchableOpacity>
         </ThemedView>
-      )
-
+      );
     }
-  }
+  };
 
   return (
     platform()
