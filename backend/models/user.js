@@ -3,7 +3,8 @@ const bcrypt = require('bcryptjs');
 
 const UserSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
-  password: { type: String, required: true }
+  password: { type: String, required: true },
+  favorites: { type: [String], default: [] } // Array to store favorite game IDs
 });
 
 // Middleware to hash password before saving
