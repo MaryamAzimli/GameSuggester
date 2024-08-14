@@ -4,7 +4,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 
-const Signup = () => {
+const forgotPass = () => {
   return (
     <ThemedView style={styles.container}>
       <ThemedText type="title">Login</ThemedText>
@@ -12,7 +12,7 @@ const Signup = () => {
   );
 };
 
-export default Signup;
+export default forgotPass;
 
 const styles = StyleSheet.create({
   container: {
