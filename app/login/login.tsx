@@ -91,7 +91,9 @@ const Login = () => {
                 </TouchableOpacity>
               </View>
 
-              <Button title="Login" onPress={handleLogin} />
+
+              <Button  title="Login" onPress={handleLogin} color={"#0F4C75"}/>
+
               <TouchableOpacity onPress={() => navigation.navigate("login/signup")}>
                 <Text style={styles.link}>Don't have an account? Signup!</Text>
               </TouchableOpacity>
@@ -128,7 +130,7 @@ const Login = () => {
             onChangeText={setPassword}
           />
           <View style={styles.linkContainer}>
-            <TouchableOpacity onPress={() => navigation.navigate("forgotPass")}>
+            <TouchableOpacity>
               <Text style={styles.passLink}>Forgot your password?</Text>
             </TouchableOpacity>
           </View>
