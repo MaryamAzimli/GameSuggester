@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, TextInput, Button, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, View, TextInput, Button, Text, TouchableOpacity, Platform } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { useNavigation } from "expo-router";
@@ -62,18 +62,23 @@ const Login = () => {
             style={styles.animation}
           />
 
+          <View style={styles.blurContainer}>
+            <ThemedText type="title" style={styles.subtitle}>
+              Login and continue your journey...
+            </ThemedText>
+            <View style={styles.box}>
               <ThemedText type="title" style={styles.title}>
                 Login
               </ThemedText>
               <TextInput
-                style={styles.input}
+                style={styles.mobileInput}
                 placeholder="Username"
                 placeholderTextColor="#aaa"
                 value={username}
                 onChangeText={setUsername}
               />
               <TextInput
-                style={styles.input}
+                style={styles.mobileInput}
                 placeholder="Password"
                 placeholderTextColor="#aaa"
                 secureTextEntry
@@ -81,7 +86,7 @@ const Login = () => {
                 onChangeText={setPassword}
               />
               <View style={styles.linkContainer}>
-                <TouchableOpacity onPress={() => navigation.navigate("forgotPass")}>
+                <TouchableOpacity>
                   <Text style={styles.passLink}>Forgot your password?</Text>
                 </TouchableOpacity>
               </View>
@@ -90,7 +95,8 @@ const Login = () => {
               <TouchableOpacity onPress={() => navigation.navigate("login/signup")}>
                 <Text style={styles.link}>Don't have an account? Signup!</Text>
               </TouchableOpacity>
-
+            </View>
+          </View>
         </ThemedView>
       );
     } else if(Platform.OS === "web"){
@@ -107,14 +113,14 @@ const Login = () => {
             />
           </View>
           <TextInput
-            style={styles.input}
+            style={styles.webInput}
             placeholder="Username"
             placeholderTextColor="#aaa"
             value={username}
             onChangeText={setUsername}
           />
           <TextInput
-            style={styles.input}
+            style={styles.webInput}
             placeholder="Password"
             placeholderTextColor="#aaa"
             secureTextEntry
@@ -126,7 +132,9 @@ const Login = () => {
               <Text style={styles.passLink}>Forgot your password?</Text>
             </TouchableOpacity>
           </View>
-          <Button title="Login" onPress={handleLogin} />
+
+          <Button  title="Login" onPress={handleLogin} color={"#0F4C75"}/>
+          
           <TouchableOpacity onPress={() => navigation.navigate("login/signup")}>
             <Text style={styles.link}>Don't have an account? Signup!</Text>
           </TouchableOpacity>
@@ -160,7 +168,18 @@ const styles = StyleSheet.create({
     height: 200,
     marginBottom: 20,
   },
-  input: {
+  mobileInput: {
+    width: "80%",
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 20,
+    color: "black",
+    backgroundColor: "white",
+  },
+  webInput: {
     width: "80%",
     height: 40,
     borderColor: "#ccc",
@@ -178,12 +197,43 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   passLink: {
-    color: "#1e90ff",
+    color: "#0F4C75",
     textAlign: "left",
   },
   link: {
     marginTop: 15,
-    color: "#1e90ff",
+    color: "#0F4C75",
     textAlign: "center",
+  },
+  animation: {
+    position: "absolute",
+    width: "125%",
+    height: "125%",
+  },
+  blurContainer: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  subtitle: {
+    fontSize: 18,
+    marginBottom: 20,
+    color: "#ffffff",
+    textAlign: "center",
+  },
+  box: {
+    width: "90%",
+    padding: 20,
+    borderRadius: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    borderColor: "rgba(255, 255, 255, 0.4)",
+    borderWidth: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 5,
   },
 });

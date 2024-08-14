@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
   clearButton: {
     position: 'absolute',
     right: 30, 
-    top: '40%',
+    top: Platform.OS === "web" ? "40%" : "60%",
     transform: [{ translateY: -12 }],
     padding: 5,
   },
