@@ -50,45 +50,94 @@ const Login = () => {
       alert("Login failed: " + error.message);
     }
   };
+
+  const platform = () => {
+    if(Platform.OS === "android" || Platform.OS === "ios"){
+      return(
+        <ThemedView style={styles.container}>
+          <LottieView
+            source={require("@/assets/animations/train.json")}
+            autoPlay
+            loop
+            style={styles.animation}
+          />
+
+              <ThemedText type="title" style={styles.title}>
+                Login
+              </ThemedText>
+              <TextInput
+                style={styles.input}
+                placeholder="Username"
+                placeholderTextColor="#aaa"
+                value={username}
+                onChangeText={setUsername}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Password"
+                placeholderTextColor="#aaa"
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+              />
+              <View style={styles.linkContainer}>
+                <TouchableOpacity onPress={() => navigation.navigate("forgotPass")}>
+                  <Text style={styles.passLink}>Forgot your password?</Text>
+                </TouchableOpacity>
+              </View>
+
+              <Button title="Login" onPress={handleLogin} />
+              <TouchableOpacity onPress={() => navigation.navigate("login/signup")}>
+                <Text style={styles.link}>Don't have an account? Signup!</Text>
+              </TouchableOpacity>
+
+        </ThemedView>
+      );
+    } else if(Platform.OS === "web"){
+      return (
+        <ThemedView style={styles.container}>
+          <ThemedText type="title" style={styles.title}>
+            Login
+          </ThemedText>
+          <View style={styles.animationContainer}>
+            <LottieView
+              source={require("@/assets/animations/suggestSimilar.json")}
+              autoPlay
+              loop
+            />
+          </View>
+          <TextInput
+            style={styles.input}
+            placeholder="Username"
+            placeholderTextColor="#aaa"
+            value={username}
+            onChangeText={setUsername}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            placeholderTextColor="#aaa"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
+          <View style={styles.linkContainer}>
+            <TouchableOpacity onPress={() => navigation.navigate("forgotPass")}>
+              <Text style={styles.passLink}>Forgot your password?</Text>
+            </TouchableOpacity>
+          </View>
+          <Button title="Login" onPress={handleLogin} />
+          <TouchableOpacity onPress={() => navigation.navigate("login/signup")}>
+            <Text style={styles.link}>Don't have an account? Signup!</Text>
+          </TouchableOpacity>
+        </ThemedView>
+      );
+    }
+  };
   
   
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.title}>
-        Login
-      </ThemedText>
-      <View style={styles.animationContainer}>
-        <LottieView
-          source={require("@/assets/animations/suggestSimilar.json")}
-          autoPlay
-          loop
-        />
-      </View>
-      <TextInput
-        style={styles.input}
-        placeholder="Username"
-        placeholderTextColor="#aaa"
-        value={username}
-        onChangeText={setUsername}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        placeholderTextColor="#aaa"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
-      <View style={styles.linkContainer}>
-        <TouchableOpacity onPress={() => navigation.navigate("forgotPass")}>
-          <Text style={styles.passLink}>Forgot your password?</Text>
-        </TouchableOpacity>
-      </View>
-      <Button title="Login" onPress={handleLogin} />
-      <TouchableOpacity onPress={() => navigation.navigate("login/signup")}>
-        <Text style={styles.link}>Don't have an account? Signup!</Text>
-      </TouchableOpacity>
-    </ThemedView>
+    platform()
   );
 };
 
