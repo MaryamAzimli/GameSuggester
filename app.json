@@ -35,7 +35,7 @@
       "typedRoutes": true
     },
     "extra": {
-      "BASE_URL": "http://139.179.208.27:3000"
+      "BASE_URL": "http://192.168.0.128:3000"
     }
   }
 }
