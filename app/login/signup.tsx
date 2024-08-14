@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -26,6 +26,10 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [passwordStrength, setPasswordStrength] = useState("");
   const [suggestedPassword, setSuggestedPassword] = useState("");
+
+  useEffect(() => {
+    navigation.setOptions({ headerShown: false });
+  }, [navigation]);
 
   const handleSignup = async () => {
     if (username.trim() === "" || email.trim() === "" || password.trim() === "") {
@@ -142,7 +146,7 @@ const Signup = () => {
               />
               <View style={styles.linkContainer}>
                 <TouchableOpacity onPress={suggestPassword}>
-                  <Text style={styles.suggestionLink}>Suggest a Password</Text>
+                  <Text style={styles.suggestionLink}>Suggest a Password!</Text>
                 </TouchableOpacity>
                 {suggestedPassword ? (
                   <View style={styles.suggestedPasswordContainer}>
@@ -205,7 +209,7 @@ const Signup = () => {
           />
           <View style={styles.linkContainer}>
             <TouchableOpacity onPress={suggestPassword}>
-              <Text style={styles.suggestionLink}>Suggest a Password</Text>
+              <Text style={styles.suggestionLink}>Suggest a Password!</Text>
             </TouchableOpacity>
             {suggestedPassword ? (
               <View style={styles.suggestedPasswordContainer}>
@@ -312,7 +316,6 @@ const styles = StyleSheet.create({
     marginTop: 15,
     color: "#0F4C75",
     textAlign: "center",
-    fontWeight: "bold",
   },
   passwordStrength: {
     color: "#ffffff",
@@ -321,7 +324,6 @@ const styles = StyleSheet.create({
   suggestionLink: {
     color: "#0F4C75",
     textAlign: "left",
-    fontWeight: "bold",
     marginTop: 10,
   },
   suggestedPassword: {
