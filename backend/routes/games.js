@@ -22,19 +22,31 @@ router.get('/download', (req, res) => {
 router.get('/games', (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const tags = req.query.tags ? req.query.tags.split(',') : [];
 
     try {
+        const filterGamesByTags = (games) => {
+            if (tags.length > 0) {
+                return games.filter(game => 
+                    tags.every(tag => game.clean_tags.includes(tag))
+                );
+            }
+            return games;
+        };
+        const fetchData = (data) => {
+            const filteredGames = filterGamesByTags(data);
+            const paginatedGames = filteredGames.slice((page - 1) * limit, page * limit);
+            res.json(paginatedGames);
+        };
         if (shouldFetchFromDrive()) {
             console.log('Fetching game data from Drive');
             authorizeAndDownloadFile(oAuth2Client, fileId, (data) => {
-                const paginatedGames = data.slice((page - 1) * limit, page * limit);
-                res.json(paginatedGames);
+                fetchData(data);
             });
         } else {
             console.log('Using cached game data');
             const cachedGameData = getCachedGameData();
-            const paginatedGames = cachedGameData.slice((page - 1) * limit, page * limit);
-            res.json(paginatedGames);
+            fetchData(cachedGameData);
         }
     } catch (error) {
         console.error('Error handling /games request:', error);
@@ -114,6 +126,5 @@ router.get('/games/:id', (req, res) => {
       res.status(500).send('Failed to process request');
   }
 });
-
 
 module.exports = router;

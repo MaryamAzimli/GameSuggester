@@ -17,15 +17,15 @@ import GameContext from "../GameContext";
 import { Game } from "./types"; // Import the Game interface
 import { useNavigation } from "@react-navigation/native";
 import { useWindowDimensions } from "react-native";
-import { Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Constants from 'expo-constants';
 
 const { BASE_URL } = Constants.expoConfig?.extra || {};
 console.log('BASE_URL:', BASE_URL);
+
 export default function TabTwoScreen() {
   const isMobile = useMediaQuery({ maxWidth: 767 });
-  const { games, topReviewedGames, loading } = useContext(GameContext);
+  const { games, filteredGames, topGames, loading, addTag, removeTag, selectedTags } = useContext(GameContext);
   const navigation = useNavigation();
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -60,7 +60,7 @@ export default function TabTwoScreen() {
       }
 
       const data = await response.json();
-      console.log("Search results:", data); // Log the search results
+      console.log("Search results:", data);
       setSearchResults(data);
     } catch (error) {
       console.error("Error during search:", error);
@@ -92,6 +92,12 @@ export default function TabTwoScreen() {
   };
 
   const handleTagClick = (tag) => {
+    if (selectedTags.includes(tag)) {
+      removeTag(tag);
+    } else {
+      addTag(tag);
+    }
+
     setTagColors((prevColors) => {
       const newColors = { ...prevColors };
       if (newColors[tag]) {
@@ -154,7 +160,7 @@ export default function TabTwoScreen() {
         </View>
         {isTagContainerVisible && (
           <View style={styles.tagContainer}>
-            {["Strategy", "Action", "RPG", "Adventure", "Puzzle"].map(
+            {["Shooter","Adventure","RPG","Battle Royale","Strategy","Sports","Puzzle","Casual","Indie","MOBA","Horror","Simulation","Fighting","Character Customization"].map(
               (tag, index) => (
                 <TouchableOpacity
                   key={index}
@@ -182,7 +188,7 @@ export default function TabTwoScreen() {
             end={{ x: 0, y: 1 }}
             style={styles.linearGradient}
           >
-            {(searchResults.length > 0 ? searchResults : games).map(
+            {(searchResults.length > 0 ? searchResults : filteredGames).map(
               (game: Game, index: number) => (
                 <TouchableOpacity
                   key={index}
@@ -230,7 +236,7 @@ export default function TabTwoScreen() {
           style={styles.linearGradient}
         >
           <View style={styles.gamesContainer}>
-            {(searchResults.length > 0 ? searchResults : games).map(
+            {(searchResults.length > 0 ? searchResults : filteredGames).map(
               (game: Game, index: number) => (
                 <View
                   key={index}
