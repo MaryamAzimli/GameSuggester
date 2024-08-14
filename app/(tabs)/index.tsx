@@ -262,17 +262,21 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   searchContainer: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 10,
   },
   searchInput: {
+    flex: 1,
     backgroundColor: "#444",
     borderRadius: 8,
     padding: 10,
     color: "#fff",
   },
   clearButton: {
-    padding: 10,
+    marginLeft: 10,
   },
   gamesContainer: {
     paddingHorizontal: 20,
