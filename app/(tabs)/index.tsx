@@ -142,24 +142,24 @@ export default function HomeScreen() {
       }
       headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
     >
-       <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search"
-            placeholderTextColor="#ccc"
-            value={query}
-            onChangeText={setQuery}
-            onSubmitEditing={handleSearch}
-          />
-          {query.length > 0 && (
-            <TouchableOpacity
-              style={styles.clearButton}
-              onPress={handleClearSearch}
-            >
-              <Ionicons name="close" size={24} color="#ccc" />
-            </TouchableOpacity>
-          )}
-        </View>
+    <View style={styles.searchContainer}>
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Search"
+        placeholderTextColor="#ccc"
+        value={query}
+        onChangeText={setQuery}
+        onSubmitEditing={handleSearch}
+      />
+      {query.length > 0 && (
+        <TouchableOpacity
+          style={styles.clearButton}
+          onPress={handleClearSearch}
+        >
+          <Ionicons name="close" size={24} color="#fff" />
+        </TouchableOpacity>
+      )}
+    </View>
       {loading || isSearching ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#fff" />
@@ -262,21 +262,24 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   searchContainer: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: 'center',
+    position: 'relative',
     paddingHorizontal: 20,
     paddingVertical: 10,
   },
   searchInput: {
-    flex: 1,
     backgroundColor: "#444",
     borderRadius: 8,
     padding: 10,
+    paddingRight: 40,
     color: "#fff",
+    flex: 1,
   },
   clearButton: {
-    marginLeft: 10,
+    position: 'absolute',
+    right: 30, 
+    top: '40%',
+    transform: [{ translateY: -12 }],
+    padding: 5,
   },
   gamesContainer: {
     paddingHorizontal: 20,
