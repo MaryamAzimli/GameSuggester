@@ -7,9 +7,9 @@ const jwtSecret = process.env.JWT_SECRET;
 
 // Signup Route
 router.post('/signup', async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, mail } = req.body;  // Include mail here
   try {
-    const user = new User({ username, password });
+    const user = new User({ username, password, mail });  // Include mail here as well
     await user.save();
     res.status(201).json({ message: 'User registered' });
   } catch (error) {
