@@ -19,6 +19,7 @@ import { Game } from "../(tabs)/types";
 import Entypo from "@expo/vector-icons/Entypo";
 import { Button } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 {
   /*import LottieView from "lottie-react-native";*/
@@ -52,7 +53,7 @@ const GameCard = () => {
   };*/
   }
 
-  const handleLikeToggle = () => {
+  /* const handleLikeToggle = () => {
     setLiked((prevLiked) => {
       const newLiked = !prevLiked;
       const message = newLiked
@@ -66,6 +67,46 @@ const GameCard = () => {
       }
       return newLiked;
     });
+  }; */
+
+  const handleLikeToggle = async () => {
+    const token = await AsyncStorage.getItem('token');
+    const userId = await AsyncStorage.getItem('userId'); // Assuming you store this during login
+    if (!token || !userId) {
+      // Handle the case where the user is not logged in
+      Alert.alert('You need to be logged in to like a game.');
+      return;
+    }
+  
+    setLiked((prevLiked) => !prevLiked);
+  
+    const url = liked ? '/removeFavorite' : '/addFavorite';
+    const method = liked ? 'POST' : 'POST';
+  
+    fetch(`http://yourbackendurl.com${url}`, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ userId, appid: game.appid }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.error) {
+          console.error('Error:', data.error);
+          Alert.alert('Error', data.error);
+        } else {
+          const message = liked
+            ? `${game.name} is removed from your favorites library`
+            : `${game.name} is added to your favorites library`;
+          Alert.alert(message);
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        Alert.alert('Error', 'Failed to update favorites. Please try again.');
+      });
   };
 
   const getRandomColor = () => {

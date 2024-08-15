@@ -11,6 +11,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Modal } from "react-native";
 import { Button } from "react-native";
 
@@ -38,10 +39,23 @@ const SettingsItem = ({
   </TouchableOpacity>
 );
 
+
 const Settings = () => {
   const [pushNotifications, setPushNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
   const navigation = useNavigation();
+  const handleLogout = async () => {
+    try {
+      // Clear stored user data
+      await AsyncStorage.removeItem('user');
+      
+      // Navigate to login screen
+      navigation.navigate('login/login');
+    } catch (error) {
+      console.error('Failed to log out:', error);
+    }
+  };
+  
   const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
 
   return (
@@ -76,9 +90,7 @@ const Settings = () => {
           />
           <SettingsItem
             title="Logout"
-            onPress={() => {
-              navigation.navigate("login/login");
-            }}
+            onPress={handleLogout}
             icon={<MaterialIcons name="logout" size={24} color="red" />}
             style={styles.logoutItem}
             textStyle={styles.logoutText}
