@@ -12,6 +12,8 @@ import { ThemedText } from "@/components/ThemedText";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Modal } from "react-native";
+import { Button } from "react-native";
 
 const SettingsItem = ({
   title,
@@ -54,6 +56,8 @@ const Settings = () => {
     }
   };
   
+  const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
+
   return (
     <ThemedView style={styles.container}>
       <ScrollView>
@@ -80,7 +84,10 @@ const Settings = () => {
         <View style={styles.section}>
           <SettingsItem title="About us" onPress={() => {}} />
           <SettingsItem title="Contact us" onPress={() => {}} />
-          <SettingsItem title="Privacy policy" onPress={() => {}} />
+          <SettingsItem
+            title="Privacy policy"
+            onPress={() => setPrivacyModalVisible(true)}
+          />
           <SettingsItem
             title="Logout"
             onPress={handleLogout}
@@ -89,7 +96,42 @@ const Settings = () => {
             textStyle={styles.logoutText}
           />
         </View>
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={privacyModalVisible}
+          onRequestClose={() => setPrivacyModalVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Privacy Policy</Text>
+              <ScrollView style={{ maxHeight: 400 }}>
+                <Text style={styles.modalText}>
+                  Our mobile application, GameSuggester, is dedicated to protecting
+                  your privacy. We collect and use personal information, such as your
+                  account details and gaming preferences, to provide a personalized
+                  experience and improve our services. We may also collect usage data
+                  to analyze how the app is used. Rest assured, your information is
+                  not shared with third parties except for essential service providers
+                  or when required by law. We prioritize the security of your data,
+                  though no method of transmission is completely secure. For more
+                  information, please refer to our detailed privacy policy.
+                </Text>
+              </ScrollView>
+              <View style={styles.buttonContainer}>
+                <View style={styles.button}>
+                  <Button
+                    title="Close"
+                    onPress={() => setPrivacyModalVisible(false)}
+                    color="#FFA500"
+                  />
+                </View>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </ScrollView>
+      
     </ThemedView>
   );
 };
@@ -133,5 +175,39 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     color: "red",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.8)",
+  },
+  modalContent: {
+    width: 400,
+    padding: 20,
+    backgroundColor: "#353636",
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    marginTop: 20,
+  },
+  button: {
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  modalTitle: {
+    fontSize: 20,
+    color: "white",
+    marginBottom: 20,
+  },
+  modalText: {
+    fontSize: 16,
+    color: "#FFFFFF",
+    marginBottom: 20,
   },
 });
