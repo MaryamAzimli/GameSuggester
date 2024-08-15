@@ -36,21 +36,21 @@ const Signup = () => {
       alert("Please fill in all fields.");
       return;
     }
-
+  
     try {
-      const response = await fetch(`${BASE_URL}/api/auth/signup`, { // Use BASE_URL from app.json
+      const response = await fetch(`${BASE_URL}/api/auth/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password, mail: email }),  // Ensure the email is passed as mail
       });
-
+  
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.error || 'Signup failed');
       }
-
+  
       const data = await response.json();
       console.log("Signup successful:", data);
       alert("Signup successful");
@@ -60,7 +60,7 @@ const Signup = () => {
       alert("Signup failed: " + error.message);
     }
   };
-
+  
   const calculatePasswordStrength = (password) => {
     let strength = "Weak";
     if (password.length >= 8 && /[a-z]/.test(password) && /[A-Z]/.test(password) && /\d/.test(password) && /\W/.test(password)) {
