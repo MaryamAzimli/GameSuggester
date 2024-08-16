@@ -30,6 +30,7 @@ const SuggestedGamesPage = () => {
   const [overlayVisible, setOverlayVisible] = useState(false);
   const [overlayContent, setOverlayContent] = useState({ color: "", icon: "" });
   const overlayOpacity = useRef(new Animated.Value(0)).current;
+  const [showDetails, setShowDetails] = useState(false);
 
   const triggerOverlay = (icon, color) => {
     setOverlayContent({ icon, color });
@@ -179,14 +180,14 @@ const SuggestedGamesPage = () => {
           </ThemedText>
           <TouchableOpacity
             style={styles.goBackButton}
-            onPress={() =>  navigation.goBack()}
+            onPress={() => navigation.goBack()}
           >
             <ThemedText style={styles.goBackText}>Go Back!</ThemedText>
           </TouchableOpacity>
         </View>
       );
     }
-
+  
     return games
       .map((game, index) => {
         const cardStyle =
@@ -197,24 +198,47 @@ const SuggestedGamesPage = () => {
                 { zIndex: games.length - index, top: -3 },
               ]
             : [styles.card, { top: index, zIndex: games.length - index }];
-
+  
         return (
           <Animated.View
             key={game.id}
             style={cardStyle}
             {...(index === 0 ? panResponder.panHandlers : {})}
           >
-            <Image source={{ uri: game.image }} style={styles.gameImage} />
-            <ThemedText style={styles.gameName}>{game.name}</ThemedText>
+            {!showDetails && (
+              <>
+                <Image source={{ uri: game.image }} style={styles.gameImage} />
+                <ThemedText style={styles.gameName}>{game.name}</ThemedText>
+              </>
+            )}
 
-            <View style={styles.cardActions}>
-              <TouchableOpacity onPress={() => forceSwipe("left")}>
-                <Entypo name="circle-with-cross" size={40} color="black" />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => forceSwipe("right")}>
-                <Entypo name="heart" size={40} color="red" />
-              </TouchableOpacity>
-            </View>
+            {showDetails && (
+              <>
+                <ThemedText style={styles.gameDescription}>
+                  Detailed information about {game.name}.
+                </ThemedText>
+              </>
+            )}
+
+            <TouchableOpacity
+              style={styles.detailButton}
+              onPress={() => setShowDetails(!showDetails)}
+            >
+              <ThemedText style={styles.detailButtonText}>
+                {showDetails ? "Go Back" : "Show Details"}
+              </ThemedText>
+            </TouchableOpacity>
+  
+            {!showDetails && (
+              <View style={styles.cardActions}>
+                <TouchableOpacity onPress={() => forceSwipe("left")}>
+                  <Entypo name="circle-with-cross" size={40} color="black" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => forceSwipe("right")}>
+                  <Entypo name="heart" size={40} color="red" />
+                </TouchableOpacity>
+              </View>
+            )}
           </Animated.View>
         );
       })
@@ -334,5 +358,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     zIndex: 1000,
     backgroundColor: "rgba(0,0,0,0.8)",
+  },
+  detailButton: {
+    marginTop: 20,
+    backgroundColor: "#FFF",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+  },
+  
+  detailButtonText: {
+    fontSize: 20,
+    color: "#000",
+  },
+  
+  gameDescription: {
+    fontSize: 16,
+    color: "black",
+    textAlign: "center",
+    marginTop: 10,
   },
 });
