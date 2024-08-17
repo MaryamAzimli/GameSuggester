@@ -3,9 +3,37 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
-const User = require('../models/user'); // Adjust path as necessary
+const User = require('../models/user'); 
 const router = express.Router();
 const jwtSecret = process.env.JWT_SECRET;
+
+// Password validation
+function isValidPassword(password) {
+  return password.length >= 6 &&
+         password.length <= 100 &&
+         /[a-z]/.test(password) &&
+         /[A-Z]/.test(password) &&
+         /\d/.test(password) &&
+         /\W/.test(password) &&
+         !/\s/.test(password);
+}
+
+// Function to suggest a new username if the current one is taken
+function suggestNewUsername(username) {
+  const randomInt = crypto.randomInt(1, 999);
+  const randomSymbol = ['-', '_'][crypto.randomInt(0, 2)];
+  let modifiedUsername = username.charAt(0).toUpperCase() + username.slice(1);
+  modifiedUsername += randomInt;
+  const randomPosition = crypto.randomInt(0, modifiedUsername.length + 1);
+  modifiedUsername = modifiedUsername.slice(0, randomPosition) + randomSymbol + modifiedUsername.slice(randomPosition);
+  return modifiedUsername;
+}
+
+// Email validation regex
+function validateEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
 
 // Function to generate a random OTP
 function generateOTP() {
@@ -38,12 +66,52 @@ async function sendOTPEmail(user, otp, subject, res) {
   });
 }
 
+
+// Route to check if a username is available
+router.post('/check-username', async (req, res) => {
+  const { username } = req.body;
+
+  try {
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      const suggestedUsername = suggestNewUsername(username);
+      return res.status(400).json({
+        message: 'Username is taken.',
+        suggestedUsername: `How about: ${suggestedUsername}?`
+      });
+    }
+    res.status(200).json({ message: 'Username is available' });
+  } catch (error) {
+    console.error('Error checking username:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
 // Signup Route
 router.post('/signup', async (req, res) => {
   const { username, password, mail } = req.body;  // Include mail here
  
 
   try {
+    // Validate email format
+     if (!validateEmail(mail)) {
+      return res.status(400).send({ message: 'Invalid email format' });
+    }
+
+    // Validate password
+    if (!isValidPassword(password)) {
+      return res.status(400).send({ message: 'Password does not meet the criteria.' });
+    }
+
+
+    // Check if the username is already taken
+    let existingUser = await User.findOne({ username });
+    if (existingUser) {
+      const suggestedUsername = suggestNewUsername(username);
+      return res.status(400).send({ message: `Username is taken. How about: ${suggestedUsername}?` });
+    }
+
     const otp = generateOTP();
     const otpExpiry = Date.now() + 3600000; // OTP expires in 1 hour
 

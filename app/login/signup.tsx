@@ -30,14 +30,113 @@ const Signup = () => {
   const [otp, setOtp] = useState(""); 
   const [verificationError, setVerificationError] = useState("");
   const [otpSent, setOtpSent] = useState(false); 
+  const [usernameError, setUsernameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
 
   useEffect(() => {
     navigation.setOptions({ headerShown: false });
   }, [navigation]);
 
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleUsernameChange = async (text) => {
+    setUsername(text);
+    setUsernameError(""); // Reset error
+  
+    if (text.length > 0) {
+      try {
+        const response = await fetch(`${BASE_URL}/api/auth/check-username`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username: text }),
+        });
+  
+        const data = await response.json(); // Parse the JSON response
+  
+        if (!response.ok) {
+          const errorMessage = data.message;
+          const suggestedUsername = data.suggestedUsername || "";
+          setUsernameError(`${errorMessage} ${suggestedUsername}`);
+        } else {
+          setUsernameError(""); // Clear any existing error if username is available
+        }
+      } catch (error) {
+        console.error("Error checking username:", error);
+        setUsernameError("An error occurred while checking the username.");
+      }
+    }
+  };
+
+  const handleEmailChange = (text) => {
+    setEmail(text);
+    setEmailError(validateEmail(text) ? "" : "Invalid email format.");
+  };
+
+  const handlePasswordChange = (text) => {
+    setPassword(text);
+    setPasswordError("");
+    calculatePasswordStrength(text);
+  };
+
+  const calculatePasswordStrength = (password) => {
+    let strength = "Weak";
+    if (password.length >= 8 && /[a-z]/.test(password) && /[A-Z]/.test(password) && /\d/.test(password) && /\W/.test(password)) {
+      strength = "Strong";
+    } else if (password.length >= 6 && /[a-z]/.test(password) && /[A-Z]/.test(password) && /\d/.test(password)) {
+      strength = "Medium";
+    }
+    setPasswordStrength(strength);
+    setPasswordError(strength === "Weak" ? "Password strength is too weak." : "");
+  };
+
+  const suggestPassword = () => {
+    const lowercase = "abcdefghijklmnopqrstuvwxyz";
+    const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const numbers = "0123456789";
+    const specialCharacters = "!@#$%^&*()_+{}[]|:;<>,.?/~`";
+    
+    const getRandomCharacter = (characters) => characters.charAt(Math.floor(Math.random() * characters.length));
+    
+    let randomPassword = [
+      getRandomCharacter(lowercase),
+      getRandomCharacter(uppercase),
+      getRandomCharacter(numbers),
+      getRandomCharacter(specialCharacters)
+    ];
+  
+    const allCharacters = lowercase + uppercase + numbers + specialCharacters;
+    randomPassword = randomPassword.concat(
+      Array.from({ length: 8 }, () => getRandomCharacter(allCharacters))
+    );
+  
+    randomPassword = randomPassword.sort(() => Math.random() - 0.5).join('');
+  
+    setSuggestedPassword(randomPassword);
+  };
+
+  const copyToClipboard = () => {
+    Clipboard.setString(suggestedPassword);
+  };
+
   const handleSignup = async () => {
+    setUsernameError("");
+    setEmailError("");
+    setPasswordError("");
+
     if (username.trim() === "" || email.trim() === "" || password.trim() === "") {
       alert("Please fill in all fields.");
+      return;
+    }
+
+    if (usernameError || emailError || passwordError) {
+      alert("Please fix the errors before submitting.");
       return;
     }
   
@@ -49,19 +148,24 @@ const Signup = () => {
         },
         body: JSON.stringify({ username, password, mail: email }),  // Ensure the email is passed as mail
       });
+
+      const data = await response.json();
   
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || 'Signup failed');
+        if (data.message.startsWith("Username is taken")) {
+          setUsernameError(data.message);
+        } else {
+          throw new Error(data.error || 'Signup failed');
+        }
+      } else {
+          setSignupSuccess(true);
+          setOtpSent(true);
+          console.log("Signup successful:", data);
       }
-  
-      const data = await response.json();
-      console.log("Signup successful:", data);
-      setSignupSuccess(true); // Set signup success to true
-      setOtpSent(true);
     } catch (error) {
       console.error("Error during signup:", error);
-      alert("Signup failed: " + error.message);
+      alert(`Signup failed: ${error.message}`);
     }
   };
 
@@ -111,44 +215,7 @@ const Signup = () => {
     }
   };
   
-  const calculatePasswordStrength = (password) => {
-    let strength = "Weak";
-    if (password.length >= 8 && /[a-z]/.test(password) && /[A-Z]/.test(password) && /\d/.test(password) && /\W/.test(password)) {
-      strength = "Strong";
-    } else if (password.length >= 6 && /[a-z]/.test(password) && /[A-Z]/.test(password) && /\d/.test(password)) {
-      strength = "Medium";
-    }
-    setPasswordStrength(strength);
-  };
 
-  const suggestPassword = () => {
-    const lowercase = "abcdefghijklmnopqrstuvwxyz";
-    const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const numbers = "0123456789";
-    const specialCharacters = "!@#$%^&*()_+{}[]|:;<>,.?/~`";
-    
-    const getRandomCharacter = (characters) => characters.charAt(Math.floor(Math.random() * characters.length));
-    
-    let randomPassword = [
-      getRandomCharacter(lowercase),
-      getRandomCharacter(uppercase),
-      getRandomCharacter(numbers),
-      getRandomCharacter(specialCharacters)
-    ];
-  
-    const allCharacters = lowercase + uppercase + numbers + specialCharacters;
-    randomPassword = randomPassword.concat(
-      Array.from({ length: 8 }, () => getRandomCharacter(allCharacters))
-    );
-  
-    randomPassword = randomPassword.sort(() => Math.random() - 0.5).join('');
-  
-    setSuggestedPassword(randomPassword);
-  };
-
-  const copyToClipboard = () => {
-    Clipboard.setString(suggestedPassword);
-  };
 
   const platform = () => {
     if(Platform.OS === "android" || Platform.OS === "ios"){
@@ -175,33 +242,43 @@ const Signup = () => {
                 placeholder="Username"
                 placeholderTextColor="#aaa"
                 value={username}
-                onChangeText={setUsername}
+                onChangeText={handleUsernameChange}
                 editable={!signupSuccess}
               />
+               {usernameError ? (
+                <Text style={styles.errorText}>{usernameError}</Text>
+              ) : null}
+
               <TextInput
                 style={[styles.mobileInput, signupSuccess && styles.disabledInput]}
                 placeholder="Email"
                 placeholderTextColor="#aaa"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={handleEmailChange}
                 editable={!signupSuccess}
               />
+            {emailError ? (
+                <Text style={styles.errorText}>{emailError}</Text>
+              ) : null}
+
               <TextInput
                 style={[styles.mobileInput, signupSuccess && styles.disabledInput]}
                 placeholder="Password"
                 placeholderTextColor="#aaa"
                 secureTextEntry
                 value={password}
-                onChangeText={(text) => {
-                  setPassword(text);
-                  calculatePasswordStrength(text);
-                }}
+                onChangeText={handlePasswordChange}
+                onSubmitEditing={(e) => e.preventDefault()}
+                blurOnSubmit={false} 
                 editable={!signupSuccess}
               />
               <View style={styles.linkContainer}>
                 <TouchableOpacity onPress={suggestPassword}>
                   <Text style={styles.suggestionLink}>Suggest a Password!</Text>
                 </TouchableOpacity>
+                {password ? (
+                  <Text style={styles.passwordStrength}>Password Strength: {passwordStrength}</Text>
+                ) : null}
                 {suggestedPassword ? (
                   <View style={styles.suggestedPasswordContainer}>
                     <Text style={styles.suggestedPassword}>{suggestedPassword}</Text>
@@ -209,9 +286,6 @@ const Signup = () => {
                       <FontAwesome6 name="copy" size={14} color="black" />
                     </TouchableOpacity>
                   </View>
-                ) : null}
-                {password ? (
-                  <Text style={styles.passwordStrength}>Password Strength: {passwordStrength}</Text>
                 ) : null}
               </View>
               
@@ -459,5 +533,10 @@ const styles = StyleSheet.create({
   disabledInput: {
     backgroundColor: "#f0f0f0",
     color: "#888",
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 10,
+    textAlign: 'center',
   },
 });
