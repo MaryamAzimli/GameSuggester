@@ -29,6 +29,7 @@ const Signup = () => {
   const [signupSuccess, setSignupSuccess] = useState(false);
   const [otp, setOtp] = useState(""); 
   const [verificationError, setVerificationError] = useState("");
+  const [otpSent, setOtpSent] = useState(false); 
 
   useEffect(() => {
     navigation.setOptions({ headerShown: false });
@@ -57,6 +58,7 @@ const Signup = () => {
       const data = await response.json();
       console.log("Signup successful:", data);
       setSignupSuccess(true); // Set signup success to true
+      setOtpSent(true);
     } catch (error) {
       console.error("Error during signup:", error);
       alert("Signup failed: " + error.message);
@@ -89,7 +91,7 @@ const Signup = () => {
 
   const handleResendOtp = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/api/auth/signup`, {
+      const response = await fetch(`${BASE_URL}/api/auth/resend-otp`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -102,14 +104,12 @@ const Signup = () => {
         throw new Error(data.error || 'Failed to resend OTP');
       }
 
-      alert("OTP has been resent to your email.");
+      const data = await response.json();
+      console.log("OTP resent successfully:", data);
     } catch (error) {
       console.error("Error resending OTP:", error);
-      alert("Failed to resend OTP: " + error.message);
     }
   };
-
-
   
   const calculatePasswordStrength = (password) => {
     let strength = "Weak";
@@ -169,22 +169,25 @@ const Signup = () => {
               <ThemedText type="title" style={styles.title}>
                 Signup
               </ThemedText>
+               
               <TextInput
-                style={styles.mobileInput}
+                style={[styles.mobileInput, signupSuccess && styles.disabledInput]}
                 placeholder="Username"
                 placeholderTextColor="#aaa"
                 value={username}
                 onChangeText={setUsername}
+                editable={!signupSuccess}
               />
               <TextInput
-                style={styles.mobileInput}
+                style={[styles.mobileInput, signupSuccess && styles.disabledInput]}
                 placeholder="Email"
                 placeholderTextColor="#aaa"
                 value={email}
                 onChangeText={setEmail}
+                editable={!signupSuccess}
               />
               <TextInput
-                style={styles.mobileInput}
+                style={[styles.mobileInput, signupSuccess && styles.disabledInput]}
                 placeholder="Password"
                 placeholderTextColor="#aaa"
                 secureTextEntry
@@ -193,6 +196,7 @@ const Signup = () => {
                   setPassword(text);
                   calculatePasswordStrength(text);
                 }}
+                editable={!signupSuccess}
               />
               <View style={styles.linkContainer}>
                 <TouchableOpacity onPress={suggestPassword}>
@@ -210,28 +214,32 @@ const Signup = () => {
                   <Text style={styles.passwordStrength}>Password Strength: {passwordStrength}</Text>
                 ) : null}
               </View>
-
-              <Button title="Signup" onPress={handleSignup} color={"#0F4C75"} />
-              {signupSuccess && (
+              
+              {signupSuccess ? (
                 <>
-                 <Text style={styles.verificationText}>
-                  Signup successful! Enter the OTP sent to your email. If you don't see it, please check your spam folder.
-                </Text>
+                  <Text style={styles.verificationText}>
+                    Signup successful! Enter the OTP sent to your email. If you don't see it, please check your spam folder.
+                  </Text>
                   <TextInput
                     style={styles.mobileInput}
                     placeholder="Enter OTP"
                     placeholderTextColor="#aaa"
                     value={otp}
                     onChangeText={setOtp}
+                    keyboardType="default"
                   />
                   <Button title="Verify OTP" onPress={handleVerifyOtp} color={"#0F4C75"} />
                   {verificationError ? (
                     <Text style={styles.verificationError}>{verificationError}</Text>
                   ) : null}
-                  <TouchableOpacity onPress={handleResendOtp}>
-                    <Text style={styles.link}>Resend OTP</Text>
-                  </TouchableOpacity>
+                  {verificationError && (
+                    <TouchableOpacity onPress={handleResendOtp}>
+                      <Text style={styles.link}>Resend OTP</Text>
+                    </TouchableOpacity>
+                  )}
                 </>
+              ) : (
+                <Button title="Signup" onPress={handleSignup} color={"#0F4C75"} />
               )}
            <TouchableOpacity onPress={() => navigation.navigate("login/login")}>
                 <Text style={styles.link}>Already have an account? Login!</Text>
@@ -447,5 +455,9 @@ const styles = StyleSheet.create({
     color: 'red',
     marginTop: 10,
     textAlign: 'center',
+  },
+  disabledInput: {
+    backgroundColor: "#f0f0f0",
+    color: "#888",
   },
 });

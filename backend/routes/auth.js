@@ -12,6 +12,32 @@ function generateOTP() {
   return crypto.randomInt(1000, 9999).toString();
 }
 
+// Function to send OTP via email
+async function sendOTPEmail(user, otp, subject, res) {
+  const transporter = nodemailer.createTransport({
+    service: 'hotmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
+    },
+  });
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: user.mail,
+    subject: subject,
+    text: `Your OTP for email verification is: ${otp}. It will expire in 1 hour. If you don't see it, please check your spam folder.`,
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error('Error sending email:', error);
+      return res.status(500).send({ message: 'Error sending OTP email' });
+    }
+    res.status(200).send({ message: `${subject} sent successfully. Please verify your email using the OTP.` });
+  });
+}
+
 // Signup Route
 router.post('/signup', async (req, res) => {
   const { username, password, mail } = req.body;  // Include mail here
@@ -21,45 +47,19 @@ router.post('/signup', async (req, res) => {
     const otp = generateOTP();
     const otpExpiry = Date.now() + 3600000; // OTP expires in 1 hour
 
-    // Assign OTP and OTP Expiry to the user object before saving
     const user = new User({ 
       username, 
       password, 
       mail, 
-      otp,         // Save OTP
-      otpExpiry    // Save OTP Expiry
+      otp,         
+      otpExpiry  
     });
 
     await user.save();
 
-    const transporter = nodemailer.createTransport({
-      service: 'hotmail',
-      auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS
-      },
-    });
-
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: user.mail,
-      subject: 'Verify your email',
-    text: `Your OTP for email verification is: ${otp}. It will expire in 1 hour.`,
-    };
-
-    // Send the email
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error('Error sending email:', error);
-        return res.status(500).send({ message: 'Error sending OTP email' });
-      }
-      res.status(200).send({ message: 'Signup successful, please verify your email using the OTP sent to your email.' });
-    });
-
-
+    await sendOTPEmail(user, otp, 'Verify your email', res);
   } catch (error) {
     console.error('Error during signup process:', error);
-    // If there is an error during user creation or other steps before sending the email
     return res.status(400).json({ error: error.message });
   }
 });
@@ -94,6 +94,29 @@ router.post('/verify-otp', async (req, res) => {
     res.status(200).send({ message: 'Email verified successfully' });
   } catch (error) {
     res.status(500).send({ message: 'Error verifying OTP' });
+  }
+});
+
+// Resend OTP Route
+router.post('/resend-otp', async (req, res) => {
+  const { username } = req.body;
+
+  try {
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(400).send({ message: 'User not found' });
+    }
+
+    const otp = generateOTP();
+    user.otp = otp;
+    user.otpExpiry = Date.now() + 3600000; // OTP expires in 1 hour
+    await user.save();
+
+    await sendOTPEmail(user, otp, 'Resend OTP', res);
+  } catch (error) {
+    console.error('Error during resend OTP process:', error);
+    return res.status(400).json({ error: error.message });
   }
 });
 
