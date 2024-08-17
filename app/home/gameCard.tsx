@@ -15,6 +15,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { AntDesign } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { Video } from "expo-av";  
 import { Game } from "../(tabs)/types";
 import Entypo from "@expo/vector-icons/Entypo";
 import { Button } from "react-native";
@@ -197,8 +198,27 @@ const GameCard = () => {
               />
             </TouchableOpacity>
           </View>
+          <View style={styles.videoContainer}>
+            {game.movies.length > 0 && (
+              <Video
+                source={{ uri: game.movies[0] }}
+                useNativeControls
+                resizeMode="contain"
+                style={styles.video}
+              />
+            )}
+          </View>
           <View style={styles.detailsContainer}>
             <ThemedText>{game.detailed_description}</ThemedText>
+            <ScrollView horizontal style={styles.screenshotsContainer}>
+            {game.screenshots.map((url, index) => (
+              <Image
+                key={index}
+                source={{ uri: url }}
+                style={styles.screenshot}
+              />
+            ))}
+          </ScrollView>
             <ThemedText>
               <ThemedText style={styles.headText}>Developer: </ThemedText>
               <ThemedText>
@@ -435,5 +455,25 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 15,
     textAlign: "center",
+  },
+  videoContainer: {
+    width: "100%",
+    height: 200,
+    marginVertical: 20,
+  },
+  video: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 8,
+  },
+  screenshotsContainer: {
+    marginVertical: 20,
+    maxHeight: 150,
+  },
+  screenshot: {
+    width: 250,
+    height: 150,
+    marginRight: 10,
+    borderRadius: 8,
   },
 });
