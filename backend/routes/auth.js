@@ -1,19 +1,99 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 const User = require('../models/user'); // Adjust path as necessary
 const router = express.Router();
 const jwtSecret = process.env.JWT_SECRET;
 
+// Function to generate a random OTP
+function generateOTP() {
+  return crypto.randomInt(1000, 9999).toString();
+}
+
 // Signup Route
 router.post('/signup', async (req, res) => {
   const { username, password, mail } = req.body;  // Include mail here
+ 
+
   try {
-    const user = new User({ username, password, mail });  // Include mail here as well
+    const otp = generateOTP();
+    const otpExpiry = Date.now() + 3600000; // OTP expires in 1 hour
+
+    // Assign OTP and OTP Expiry to the user object before saving
+    const user = new User({ 
+      username, 
+      password, 
+      mail, 
+      otp,         // Save OTP
+      otpExpiry    // Save OTP Expiry
+    });
+
     await user.save();
-    res.status(201).json({ message: 'User registered' });
+
+    const transporter = nodemailer.createTransport({
+      service: 'hotmail',
+      auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: user.mail,
+      subject: 'Verify your email',
+    text: `Your OTP for email verification is: ${otp}. It will expire in 1 hour.`,
+    };
+
+    // Send the email
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Error sending email:', error);
+        return res.status(500).send({ message: 'Error sending OTP email' });
+      }
+      res.status(200).send({ message: 'Signup successful, please verify your email using the OTP sent to your email.' });
+    });
+
+
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error('Error during signup process:', error);
+    // If there is an error during user creation or other steps before sending the email
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+// Route to verify OTP
+router.post('/verify-otp', async (req, res) => {
+  const { username, otp } = req.body;
+
+  try {
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(400).send({ message: 'User not found' });
+    }
+
+    console.log(`Stored OTP: ${user.otp}, Provided OTP: ${otp}`); // Add logging
+
+
+    if (user.otp !== otp) {
+      return res.status(400).send({ message: 'Invalid OTP' });
+    }
+
+    if (user.otpExpiry < Date.now()) {
+      return res.status(400).send({ message: 'OTP expired' });
+    }
+
+    user.isVerified = true;
+    user.otp = null;  // Clear the OTP after verification
+    user.otpExpiry = null;
+    await user.save();
+
+    res.status(200).send({ message: 'Email verified successfully' });
+  } catch (error) {
+    res.status(500).send({ message: 'Error verifying OTP' });
   }
 });
 

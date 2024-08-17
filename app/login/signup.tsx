@@ -26,6 +26,9 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [passwordStrength, setPasswordStrength] = useState("");
   const [suggestedPassword, setSuggestedPassword] = useState("");
+  const [signupSuccess, setSignupSuccess] = useState(false);
+  const [otp, setOtp] = useState(""); 
+  const [verificationError, setVerificationError] = useState("");
 
   useEffect(() => {
     navigation.setOptions({ headerShown: false });
@@ -53,13 +56,60 @@ const Signup = () => {
   
       const data = await response.json();
       console.log("Signup successful:", data);
-      alert("Signup successful");
-      navigation.navigate("index");
+      setSignupSuccess(true); // Set signup success to true
     } catch (error) {
       console.error("Error during signup:", error);
       alert("Signup failed: " + error.message);
     }
   };
+
+  const handleVerifyOtp = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/api/auth/verify-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, otp }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'OTP verification failed');
+      }
+
+      const data = await response.json();
+      console.log("OTP verified successfully:", data);
+      navigation.navigate("profilePage", { username }); // Navigate to the profile page with the username
+    } catch (error) {
+      console.error("Error during OTP verification:", error);
+      setVerificationError("OTP verification failed. Please try again.");
+    }
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/api/auth/signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password, mail: email }), 
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to resend OTP');
+      }
+
+      alert("OTP has been resent to your email.");
+    } catch (error) {
+      console.error("Error resending OTP:", error);
+      alert("Failed to resend OTP: " + error.message);
+    }
+  };
+
+
   
   const calculatePasswordStrength = (password) => {
     let strength = "Weak";
@@ -162,7 +212,28 @@ const Signup = () => {
               </View>
 
               <Button title="Signup" onPress={handleSignup} color={"#0F4C75"} />
-              <TouchableOpacity onPress={() => navigation.navigate("login/login")}>
+              {signupSuccess && (
+                <>
+                 <Text style={styles.verificationText}>
+                  Signup successful! Enter the OTP sent to your email. If you don't see it, please check your spam folder.
+                </Text>
+                  <TextInput
+                    style={styles.mobileInput}
+                    placeholder="Enter OTP"
+                    placeholderTextColor="#aaa"
+                    value={otp}
+                    onChangeText={setOtp}
+                  />
+                  <Button title="Verify OTP" onPress={handleVerifyOtp} color={"#0F4C75"} />
+                  {verificationError ? (
+                    <Text style={styles.verificationError}>{verificationError}</Text>
+                  ) : null}
+                  <TouchableOpacity onPress={handleResendOtp}>
+                    <Text style={styles.link}>Resend OTP</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+           <TouchableOpacity onPress={() => navigation.navigate("login/login")}>
                 <Text style={styles.link}>Already have an account? Login!</Text>
               </TouchableOpacity>
             </View>
@@ -225,6 +296,28 @@ const Signup = () => {
           </View>
 
           <Button title="Signup" onPress={handleSignup} color={"#0F4C75"} />
+          {signupSuccess && (
+            <>
+              <Text style={styles.verificationText}>
+                Signup successful! Enter the OTP sent to your email.
+              </Text>
+              <TextInput
+                style={styles.webInput}
+                placeholder="Enter OTP"
+                placeholderTextColor="#aaa"
+                value={otp}
+                onChangeText={setOtp}
+              />
+              <Button title="Verify OTP" onPress={handleVerifyOtp} color={"#0F4C75"} />
+              {verificationError ? (
+                <Text style={styles.verificationError}>{verificationError}</Text>
+              ) : null}
+              <TouchableOpacity onPress={handleResendOtp}>
+                <Text style={styles.link}>Resend OTP</Text>
+              </TouchableOpacity>
+            </>
+          )}
+
           <TouchableOpacity onPress={() => navigation.navigate("login/login")}>
             <Text style={styles.link}>Already have an account? Login!</Text>
           </TouchableOpacity>
@@ -344,5 +437,15 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     marginBottom: 20,
+  },
+  verificationText: {
+    color: '#FF5722',
+    marginTop: 20,
+    textAlign: 'center',
+  },
+  verificationError: {
+    color: 'red',
+    marginTop: 10,
+    textAlign: 'center',
   },
 });

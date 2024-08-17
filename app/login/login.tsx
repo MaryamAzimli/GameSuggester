@@ -44,7 +44,7 @@ const Login = () => {
       await AsyncStorage.setItem('token', data.token);
       await AsyncStorage.setItem('user', JSON.stringify(data.user));
       alert("Login successful");
-      navigation.navigate("index");
+      navigation.navigate("profilePage", { username });
     } catch (error) {
       console.error("Error during login:", error);
       alert("Login failed: " + error.message);

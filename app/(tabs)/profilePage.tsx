@@ -19,6 +19,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { Feather } from "@expo/vector-icons";
 import { useMediaQuery } from "react-responsive";
 import { Ionicons } from "@expo/vector-icons";
+import { useRoute } from "@react-navigation/native";
 import alien from "@/assets/defaultProfiles/alien.png";
 import astronout from "@/assets/defaultProfiles/astronout.png";
 import criminal from "@/assets/defaultProfiles/criminal.png";
@@ -51,7 +52,8 @@ const ProfilePage = () => {
   const [deleteListIndex, setDeleteListIndex] = useState(null);
   const [profilePicModalVisible, setProfilePicModalVisible] = useState(false);
   const [selectedProfilePic, setSelectedProfilePic] = useState(elf);
-  const [username, setUsername] = useState("");
+  const route = useRoute();
+  const { username } = route.params || {};
 
   useEffect(() => {
     const fetchUserData = async () => {
