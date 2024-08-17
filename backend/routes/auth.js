@@ -5,44 +5,139 @@ const User = require('../models/user'); // Adjust path as necessary
 const router = express.Router();
 const jwtSecret = process.env.JWT_SECRET;
 
+function isAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+      return next();
+  }
+  res.status(401).send('Unauthorized');
+}
+
+router.get('/profile', isAuthenticated, (req, res) => {
+  // Return user profile data
+  res.send(req.user);
+});
+
 // Signup Route
 router.post('/signup', async (req, res) => {
   const { username, password, mail } = req.body;  // Include mail here
   try {
-    const user = new User({ username, password, mail });  // Include mail here as well
-    await user.save();
-    res.status(201).json({ message: 'User registered' });
+    // Hash the password
+    const hash = await bcrypt.hash(password, 10);
+    
+    // Create the new user with the hashed password
+    const user = await User.create({
+      username,
+      password: hash,
+      mail, // Include mail here as well
+    });
+
+    // Generate JWT token
+    const maxAge = 3 * 60 * 60; // 3 hours
+    const token = jwt.sign(
+      { id: user._id, username },
+      jwtSecret,
+      { expiresIn: maxAge }
+    );
+
+    // Set the JWT cookie
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      maxAge: maxAge * 1000, // 3 hours in milliseconds
+      secure: process.env.NODE_ENV === 'production', // Set to true in production
+    });
+
+    // Send response
+    res.status(201).json({
+      message: "User successfully created",
+      user: user._id,
+    });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({
+      message: "User not successfully created",
+      error: error.message,
+    });
   }
 });
 
-// Login Route
+/* // Login Route
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
+
   try {
+    // Find the user by username
+    const user = await User.findOne({ username, password });
+    
+    bcrypt.compare(password, user.password).then(function(result){
+      if(result){
+        const maxAge=2*60*60;
+        const token=jwt=jwt.sign({
+          id:user._id, username},
+          jwtSecret,
+          {
+            expiresIn:maxAge,//3hrs
+          }
+        );
+        res.cookie("jwt", token, {
+          httpOnly: true,
+          maxAge: maxAge*1000,
+        });
+        res.status(201).json({
+        message: "Login successful",
+        user: useDerivedValue._id,
+        });
+      }
+      else{
+        res.status(400).json({message: "Login not successful", user})
+      }
+ 
+  })} catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}); */
+router.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    // Find the user by username only
     const user = await User.findOne({ username });
-    if (!user || !await bcrypt.compare(password, user.password)) {
-      return res.status(401).json({ error: 'Authentication failed' });
+    
+    if (!user) {
+      return res.status(400).json({ message: "Login not successful: User not found" });
     }
-    const token = jwt.sign({ id: user._id, username: user.username }, jwtSecret, { expiresIn: '1h' });
-    res.status(200).json({ message: 'Login successful', token, user: { id: user._id, username: user.username } });
+
+    // Compare the provided password with the hashed password in the database
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (isMatch) {
+      const maxAge = 2 * 60 * 60; // 2 hours
+      const token = jwt.sign(
+        { id: user._id, username: user.username },
+        jwtSecret,
+        { expiresIn: maxAge } // 2 hours
+      );
+
+      res.cookie("jwt", token, {
+        httpOnly: true,
+        maxAge: maxAge * 1000, // 2 hours in milliseconds
+      });
+
+      res.status(201).json({
+        message: "Login successful",
+        user: user._id,
+      });
+    } else {
+      res.status(400).json({ message: "Login not successful: Incorrect password" });
+    }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
+
+
 // Logout Route
 router.post('/logout', (req, res) => {
-  const token = req.headers['authorization']?.split(' ')[1];
-
-  if (!token) {
-    return res.status(400).json({ message: 'No token provided' });
-  }
-
-  // Here, you can optionally handle token invalidation, like adding it to a blacklist
-  // For now, we'll just send a success message
-
+  res.clearCookie("jwt");
   res.status(200).json({ message: 'Logged out successfully' });
 });
 
