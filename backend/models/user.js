@@ -5,7 +5,9 @@ const UserSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   mail: {type: String, required: true},
-  verified: {type: Boolean, required: false},
+  otp: { type: String }, 
+  otpExpiry: { type: Date }, 
+  isVerified: {type: Boolean, default: false},
   favorites: { type: [String], default: [] } // Array to store favorite game IDs
 });
 
