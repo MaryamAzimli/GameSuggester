@@ -317,10 +317,6 @@ useEffect(() => {
     return null;
   };
 
-  const handlePlusPress = () => {
-    setModalVisible(true);
-  };
-
   return (
     <ParallaxScrollView
       headerBackgroundColor={{
@@ -379,25 +375,6 @@ useEffect(() => {
           >
             Games
           </ThemedText>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, selectedTab === "Lists" && styles.selectedTab]}
-          onPress={() => setSelectedTab("Lists")}
-        >
-          <ThemedText
-            style={[
-              styles.tabText,
-              selectedTab === "Lists" && styles.selectedTabText,
-            ]}
-          >
-            Lists
-          </ThemedText>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.tab}
-          onPress={() => selectedTab === "Lists" && handlePlusPress()}
-        >
-          <Feather name="plus" size={24} color="white" />
         </TouchableOpacity>
       </ThemedView>
       {renderContent()}
