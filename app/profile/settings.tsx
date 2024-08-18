@@ -58,21 +58,7 @@ const Settings = () => {
   };
   
   const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
-  const [contactModalVisible, setContactModalVisible] = useState(false);
-  const [userMessage, setUserMessage] = useState("");
   const [aboutModalVisible, setAboutModalVisible] = useState(false);
-  const [usernameModalVisible, setUsernameModalVisible] = useState(false);
-  const [passwordModalVisible, setPasswordModalVisible] = useState(false);
-  const [emailModalVisible, setEmailModalVisible] = useState(false);
-
-  const [currentUsername, setCurrentUsername] = useState("current_username");
-  const [newUsername, setNewUsername] = useState("");
-
-  const [currentPassword, setCurrentPassword] = useState("current_password");
-  const [newPassword, setNewPassword] = useState("");
-
-  const [currentEmail, setCurrentEmail] = useState("current_email@example.com");
-  const [newEmail, setNewEmail] = useState("");
 
   return (
     <ThemedView style={styles.container}>
@@ -81,39 +67,22 @@ const Settings = () => {
           Settings
         </ThemedText>
         <View style={styles.section}>
-        <SettingsItem title="Change username" onPress={() => setUsernameModalVisible(true)} />
-        <SettingsItem title="Change password" onPress={() => setPasswordModalVisible(true)} />
-        <SettingsItem title="Change email" onPress={() => setEmailModalVisible(true)} />
-          <SettingsItem
-            title="Push notifications"
-            hasSwitch
-            switchValue={pushNotifications}
-            onSwitchChange={(value) => setPushNotifications(value)}
-          />
-          <SettingsItem
-            title="Dark mode"
-            hasSwitch
-            switchValue={darkMode}
-            onSwitchChange={(value) => setDarkMode(value)}
-          />
-        </View>
-        <View style={styles.section}>
           <SettingsItem title="About us" onPress={() => setAboutModalVisible(true)} />
-          <SettingsItem
-            title="Contact us"
-            onPress={() => setContactModalVisible(true)}
-          />
           <SettingsItem
             title="Privacy policy"
             onPress={() => setPrivacyModalVisible(true)}
           />
+        </View>
+        <View style={styles.dumpSection}>
+        </View>
+        <View style={styles.logoutSection}>
           <SettingsItem
-            title="Logout"
-            onPress={handleLogout}
-            icon={<MaterialIcons name="logout" size={24} color="red" />}
-            style={styles.logoutItem}
-            textStyle={styles.logoutText}
-          />
+              title="Logout"
+              onPress={handleLogout}
+              icon={<MaterialIcons name="logout" size={24} color="red" />}
+              style={styles.logoutItem}
+              textStyle={styles.logoutText}
+            />
         </View>
         <Modal
           animationType="fade"
@@ -134,7 +103,7 @@ const Settings = () => {
                   not shared with third parties except for essential service providers
                   or when required by law. We prioritize the security of your data,
                   though no method of transmission is completely secure. For more
-                  information, please refer to our detailed privacy policy.
+                  information, please contact the developers of the application.
                 </Text>
               </ScrollView>
               <View style={styles.buttonContainer}>
@@ -143,46 +112,6 @@ const Settings = () => {
                     title="Close"
                     onPress={() => setPrivacyModalVisible(false)}
                     color="#FFA500"
-                  />
-                </View>
-              </View>
-            </View>
-          </View>
-        </Modal>
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={contactModalVisible}
-          onRequestClose={() => setContactModalVisible(false)}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Send us your message!</Text>
-              <TextInput
-                style={styles.textArea}
-                placeholder="Type your message here..."
-                placeholderTextColor="#999"
-                multiline={true}
-                numberOfLines={4}
-                value={userMessage}
-                onChangeText={setUserMessage}
-              />
-              <View style={styles.buttonContainer}>
-                <View style={styles.button}>
-                  <Button
-                    title="Close"
-                    onPress={() => setContactModalVisible(false)}
-                    color="#FFA500"
-                  />
-                </View>
-                <View style={styles.button}>
-                  <Button
-                    title="Send"
-                    onPress={() => {
-                      console.log('Message sent:', userMessage);
-                      setContactModalVisible(false);
-                    }}
-                    color="#00FF00"
                   />
                 </View>
               </View>
@@ -215,127 +144,7 @@ const Settings = () => {
             </View>
           </View>
         </Modal>
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={usernameModalVisible}
-          onRequestClose={() => setUsernameModalVisible(false)}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Change Username</Text>
-              <Text style={styles.modalText}>Your current username is: {currentUsername}</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="New Username"
-                placeholderTextColor="#999"
-                value={newUsername}
-                onChangeText={setNewUsername}
-              />
-              <View style={styles.buttonContainer}>
-                <View style={styles.button}>
-                  <Button
-                    title="Close"
-                    onPress={() => setUsernameModalVisible(false)}
-                    color="#FFA500"
-                  />
-                </View>
-                <View style={styles.button}>
-                  <Button
-                    title="Save"
-                    onPress={() => {
-                      console.log('Username changed to:', newUsername);
-                      setUsernameModalVisible(false);
-                    }}
-                    color="#00FF00"
-                  />
-                </View>
-              </View>
-            </View>
-          </View>
-        </Modal>
 
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={passwordModalVisible}
-          onRequestClose={() => setPasswordModalVisible(false)}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Change Password</Text>
-              <Text style={styles.modalText}>Your current password is: {currentPassword}</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="New Password"
-                placeholderTextColor="#999"
-                secureTextEntry={true}
-                value={newPassword}
-                onChangeText={setNewPassword}
-              />
-              <View style={styles.buttonContainer}>
-                <View style={styles.button}>
-                  <Button
-                    title="Close"
-                    onPress={() => setPasswordModalVisible(false)}
-                    color="#FFA500"
-                  />
-                </View>
-                <View style={styles.button}>
-                  <Button
-                    title="Save"
-                    onPress={() => {
-                      console.log('Password changed to:', newPassword);
-                      setPasswordModalVisible(false);
-                    }}
-                    color="#00FF00"
-                  />
-                </View>
-              </View>
-            </View>
-          </View>
-        </Modal>
-
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={emailModalVisible}
-          onRequestClose={() => setEmailModalVisible(false)}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Change Email</Text>
-              <Text style={styles.modalText}>Your current email is: {currentEmail}</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="New Email"
-                placeholderTextColor="#999"
-                keyboardType="email-address"
-                value={newEmail}
-                onChangeText={setNewEmail}
-              />
-              <View style={styles.buttonContainer}>
-                <View style={styles.button}>
-                  <Button
-                    title="Close"
-                    onPress={() => setEmailModalVisible(false)}
-                    color="#FFA500"
-                  />
-                </View>
-                <View style={styles.button}>
-                  <Button
-                    title="Save"
-                    onPress={() => {
-                      console.log('Email changed to:', newEmail);
-                      setEmailModalVisible(false);
-                    }}
-                    color="#00FF00"
-                  />
-                </View>
-              </View>
-            </View>
-          </View>
-        </Modal>
       </ScrollView>
       
     </ThemedView>
@@ -359,7 +168,10 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   logoutSection: {
-    marginVertical: 290,
+    marginVertical: 50,
+  },
+  dumpSection: {
+    marginVertical: 220,
   },
   settingsItem: {
     flexDirection: "row",
