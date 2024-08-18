@@ -34,6 +34,8 @@ import superHero from "@/assets/defaultProfiles/superHero.png";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const { BASE_URL } = Constants.expoConfig?.extra || {};
 import Constants from 'expo-constants';
+import { ImagePickerIOS } from "react-native";
+import * as ImagePicker from 'expo-image-picker';
 
 const ProfilePage = () => {
   const [selectedTab, setSelectedTab] = useState("Games");
@@ -73,8 +75,28 @@ const ProfilePage = () => {
     setProfilePicModalVisible(true);
   };
 
-  const handleProfilePicSelect = (pic) => {
-    setSelectedProfilePic(pic);
+  const handleProfilePicSelect = async (pic, isUpload = false) => {
+    if (isUpload) {
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  
+      if (permissionResult.granted === false) {
+        Alert.alert("Permission to access camera roll is required!");
+        return;
+      }
+  
+      const pickerResult = await ImagePicker.launchImageLibraryAsync({
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+  
+      if (!pickerResult.canceled) {
+        setSelectedProfilePic({ uri: pickerResult.assets[0].uri });
+      }
+    } else {
+      setSelectedProfilePic(pic);
+    }
+  
     setProfilePicModalVisible(false);
   };
 
@@ -547,6 +569,15 @@ useEffect(() => {
                 >
                   <Image source={superHero} style={styles.profilePicImage} />
                 </TouchableOpacity>
+                <TouchableOpacity onPress={() => handleProfilePicSelect(null, true)}>
+                  <View style={styles.uploadContainer}>
+                    <Ionicons name="cloud-upload-outline" size={40} color="white" />
+                    <ThemedText style={styles.uploadText}>Upload</ThemedText>
+                  </View>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.profilePicRow}>
+
               </View>
             </ScrollView>
             <View style={styles.buttonContainer}>
@@ -768,5 +799,19 @@ const styles = StyleSheet.create({
   gameDeveloper: {
     fontSize: 14,
     color: 'gray',
+  },
+  uploadContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#555',
+    margin: 10,
+  },
+  uploadText: {
+    color: '#FFFFFF',
+    marginTop: 5,
+    textAlign: 'center',
   },
 });
