@@ -9,15 +9,16 @@ import {
   PanResponder,
   Text,
   Platform,
+  Alert,
 } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import LottieView from "lottie-react-native";
 import Entypo from "@expo/vector-icons/Entypo";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import Constants from 'expo-constants';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
 
 const { BASE_URL } = Constants.expoConfig?.extra || {};
-console.log('BASE_URL:', BASE_URL);
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 
@@ -27,10 +28,42 @@ const SuggestedGamesPage = () => {
   const [colorAnimation] = useState(new Animated.Value(0));
   const [games, setGames] = useState<any[]>([]);
   const position = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
-  const [overlayVisible, setOverlayVisible] = useState(false);
-  const [overlayContent, setOverlayContent] = useState({ color: "", icon: "" });
   const overlayOpacity = useRef(new Animated.Value(0)).current;
+  const [overlayContent, setOverlayContent] = useState({ color: "", icon: "" });
   const [showDetails, setShowDetails] = useState(false);
+
+  const addToFavorites = async (gameId) => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        Alert.alert("You need to be logged in to like a game.");
+        return;
+      }
+
+      const response = await fetch(`${BASE_URL}/api/auth/addFavorite`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ appid: gameId }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to add game to favorites");
+      }
+
+      Alert.alert("Success", "Game added to your favorites library.");
+    } catch (error) {
+      console.error("Error:", error);
+      Alert.alert(
+        "Error",
+        error.message || "Failed to add game to favorites. Please try again."
+      );
+    }
+  };
 
   const triggerOverlay = (icon, color) => {
     setOverlayContent({ icon, color });
@@ -46,9 +79,9 @@ const SuggestedGamesPage = () => {
         duration: 300,
         delay: 300,
         useNativeDriver: true,
-      })
+      }),
     ]).start();
-};
+  };
 
   const panResponder = useRef(
     PanResponder.create({
@@ -59,32 +92,37 @@ const SuggestedGamesPage = () => {
       ),
       onPanResponderRelease: (e, gestureState) => {
         if (gestureState.dx > 120) {
-            forceSwipe("right");
+          forceSwipe("right");
         } else if (gestureState.dx < -120) {
-            forceSwipe("left");
+          forceSwipe("left");
         } else {
-            resetPosition();
+          resetPosition();
         }
-    },
+      },
     })
   ).current;
 
   const forceSwipe = (direction) => {
     const x = direction === "right" ? screenWidth : -screenWidth;
-    
+
     Animated.timing(position, {
       toValue: { x, y: 0 },
       duration: 250,
       useNativeDriver: false,
     }).start(() => onSwipeComplete(direction));
-};
+  };
 
   const onSwipeComplete = (direction) => {
     const icon = direction === "right" ? "heart" : "circle-with-cross";
     const color = direction === "right" ? "rgba(255,0,0,0.8)" : "rgba(0,0,0,0.8)";
-    
+
     triggerOverlay(icon, color);
-  
+
+    if (direction === "right" && games.length > 0) {
+      addToFavorites(games[0].id); // Add the first game in the list to favorites
+      console.log(games[0].id);
+    }
+
     setTimeout(() => {
       setGames((prevGames) => prevGames.slice(1));
       position.setValue({ x: 0, y: 0 });
@@ -116,11 +154,17 @@ const SuggestedGamesPage = () => {
 
   const renderOverlay = () => {
     return (
-      <Animated.View pointerEvents="none" style={[styles.overlay, { backgroundColor: overlayContent.color, opacity: overlayOpacity }]}>
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          styles.overlay,
+          { backgroundColor: overlayContent.color, opacity: overlayOpacity },
+        ]}
+      >
         <Entypo name={overlayContent.icon} size={100} color="#FFF" />
       </Animated.View>
     );
-};
+  };
 
   useEffect(() => {
     const startAnimation = () => {
@@ -153,7 +197,8 @@ const SuggestedGamesPage = () => {
             .then((data) => ({
               id: data.id,
               name: data.name,
-              image: data.header_image || "/assets/defaultProfiles/default.png",
+              image:
+                data.header_image || "/assets/defaultProfiles/default.png",
             }))
         );
         const fetchedGames = await Promise.all(gamePromises);
@@ -187,7 +232,7 @@ const SuggestedGamesPage = () => {
         </View>
       );
     }
-  
+
     return games
       .map((game, index) => {
         const cardStyle =
@@ -198,7 +243,7 @@ const SuggestedGamesPage = () => {
                 { zIndex: games.length - index, top: -3 },
               ]
             : [styles.card, { top: index, zIndex: games.length - index }];
-  
+
         return (
           <Animated.View
             key={game.id}
@@ -228,11 +273,15 @@ const SuggestedGamesPage = () => {
                 {showDetails ? "Go Back" : "Show Details"}
               </ThemedText>
             </TouchableOpacity>
-  
+
             {!showDetails && (
               <View style={styles.cardActions}>
                 <TouchableOpacity onPress={() => forceSwipe("left")}>
-                  <Entypo name="circle-with-cross" size={40} color="black" />
+                  <Entypo
+                    name="circle-with-cross"
+                    size={40}
+                    color="black"
+                  />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => forceSwipe("right")}>
                   <Entypo name="heart" size={40} color="red" />
@@ -281,7 +330,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: screenWidth * 0.8,
     height: screenHeight * 0.6,
-    borderRadius: 25, 
+    borderRadius: 25,
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
@@ -290,14 +339,14 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 10,
     backgroundColor: "#FFF",
-    padding: 20, 
+    padding: 20,
   },
   gameImage: {
     width: "100%",
     height: "40%",
     borderRadius: 15,
     marginBottom: 100,
-    overlayColor: "rgba(0,0,0,0.3)", 
+    overlayColor: "rgba(0,0,0,0.3)",
   },
   gameName: {
     fontSize: 24,
@@ -311,8 +360,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     width: "100%",
     margin: 10,
-    paddingVertical: 10, 
-    borderRadius: 10,  
+    paddingVertical: 10,
+    borderRadius: 10,
   },
   lottieContainer: {
     position: "absolute",
@@ -366,12 +415,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 20,
   },
-  
   detailButtonText: {
     fontSize: 20,
     color: "#000",
   },
-  
   gameDescription: {
     fontSize: 16,
     color: "black",
