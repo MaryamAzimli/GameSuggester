@@ -99,6 +99,7 @@ const ProfilePage = () => {
     navigation.navigate("profile/lists", { listName: lists[index].name });
   };
 
+
   const handleAddList = () => {
     if (listName.trim()) {
       const isDuplicate = lists.some(
@@ -232,7 +233,11 @@ useEffect(() => {
           <ScrollView contentContainerStyle={styles.contentContainer}>
             {favoriteGames.length > 0 ? (
               favoriteGames.map((game, index) => (
-                <TouchableOpacity key={index} style={styles.gameCard}>
+                <TouchableOpacity key={index} style={styles.gameCard} 
+                  onPress={() =>
+                    navigation.navigate("home/gameCard", { game })
+                  }
+                >
                   <Image source={{ uri: game.header_image }} style={styles.gameImage} />
                   <View style={styles.gameInfo}>
                     <ThemedText style={styles.gameTitle} numberOfLines={1} ellipsizeMode="tail">
