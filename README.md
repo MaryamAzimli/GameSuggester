@@ -16,6 +16,17 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
     npx expo start
    ```
 
+**Note:**  This app works only on mobile devices. To open the app:
+- Make sure your mobile device and PC are connected to the same network.
+- Scan the QR code that appears in the terminal or Expo DevTools with your mobile device.
+- If the QR code is not accessible, download the [Expo Go](https://expo.dev/go) app from the [Google Play Store](https://play.google.com/store/apps/details?id=host.exp.exponent&hl=en&pli=1) or [Apple App Store](https://apps.apple.com/us/app/expo-go/id982107779).
+- Open Expo Go and enter the URL shown in the terminal or DevTools manually.
+
+If you still have any problems accessing the app, feel free to email us at:
+- [gamesuggester24@gmail.com](mailto:gamesuggester24@gmail.com)
+- [gamesuggester24@hotmail.com](mailto:gamesuggester24@hotmail.com)
+
+
 In the output, you'll find options to open the app in a
 
 - [development build](https://docs.expo.dev/develop/development-builds/introduction/)
@@ -24,7 +35,19 @@ In the output, you'll find options to open the app in a
 - [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
  3. For backend, please open backend directory.
+   1. Configure the `BASE URL`
+      - Open the app.json file in the root of the project.
+      - Modify the following under the "extra" section:
+      ```json
+      "extra": {
+      "BASE_URL": "http://your-local-ip:3000"
+      }
+      ```
+      - Replace "http://your-local-ip:3000" with your local IP address. You can find your local IP address by running `ipconfig` on Windows or `ifconfig` on macOS/Linux.
+   
+   2. Start Server
     ```bash
+      cd backend
       npm i
       node server.js
     ```
