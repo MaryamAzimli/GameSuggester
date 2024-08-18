@@ -88,14 +88,7 @@ const Login = () => {
                 secureTextEntry
                 value={password}
                 onChangeText={setPassword}
-              />
-              <View style={styles.linkContainer}>
-                <TouchableOpacity>
-                  <Text style={styles.passLink}>Forgot your password?</Text>
-                </TouchableOpacity>
-              </View>
-
-
+              />    
               <Button  title="Login" onPress={handleLogin} color={"#0F4C75"}/>
 
               <TouchableOpacity onPress={() => navigation.navigate("login/signup")}>
@@ -133,12 +126,6 @@ const Login = () => {
             value={password}
             onChangeText={setPassword}
           />
-          <View style={styles.linkContainer}>
-            <TouchableOpacity>
-              <Text style={styles.passLink}>Forgot your password?</Text>
-            </TouchableOpacity>
-          </View>
-
           <Button  title="Login" onPress={handleLogin} color={"#0F4C75"}/>
           
           <TouchableOpacity onPress={() => navigation.navigate("login/signup")}>
@@ -195,16 +182,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: "#ffffff",
     backgroundColor: "#2a2a2a",
-  },
-  linkContainer: {
-    marginTop: -10,
-    width: "80%",
-    alignItems: "flex-start",
-    marginBottom: 20,
-  },
-  passLink: {
-    color: "#0F4C75",
-    textAlign: "left",
   },
   link: {
     marginTop: 15,
