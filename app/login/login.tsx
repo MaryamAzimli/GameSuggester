@@ -34,12 +34,13 @@ const Login = () => {
         body: JSON.stringify({ username, password }),
       });
   
+      const data = await response.json();  // Fetch response once
+  
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || `HTTP error! Status: ${response.status}`);
+        // Handle errors based on the status code
+        throw new Error(data.message || `HTTP error! Status: ${response.status}`);
       }
   
-      const data = await response.json();
       console.log("Login successful:", data);
   
       await AsyncStorage.setItem('token', data.token);

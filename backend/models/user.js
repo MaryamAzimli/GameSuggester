@@ -10,13 +10,12 @@ const UserSchema = new mongoose.Schema({
   isVerified: {type: Boolean, default: false},
   favorites: { type: [String], default: [] } // Array to store favorite game IDs
 });
-
-// Middleware to hash password before saving
 UserSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 8);
+  this.password = await bcrypt.hash(this.password, 10); // Verify that this is consistent with all uses of bcrypt
   next();
 });
+
 
 const User = mongoose.model('User', UserSchema);
 module.exports = User;

@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
-const User = require('../models/user'); 
+const User = require('../models/user');
 const router = express.Router();
 const jwtSecret = process.env.JWT_SECRET;
 
@@ -34,12 +34,12 @@ function authenticateToken(req, res, next) {
 // Password validation
 function isValidPassword(password) {
   return password.length >= 6 &&
-         password.length <= 100 &&
-         /[a-z]/.test(password) &&
-         /[A-Z]/.test(password) &&
-         /\d/.test(password) &&
-         /\W/.test(password) &&
-         !/\s/.test(password);
+    password.length <= 100 &&
+    /[a-z]/.test(password) &&
+    /[A-Z]/.test(password) &&
+    /\d/.test(password) &&
+    /\W/.test(password) &&
+    !/\s/.test(password);
 }
 
 // Function to suggest a new username if the current one is taken
@@ -117,12 +117,8 @@ router.post('/signup', async (req, res) => {
   const { username, password, mail } = req.body;
 
   try {
-    // Hash the password
-    const hash = await bcrypt.hash(password, 10);
-
-    // Generate OTP
     // Validate email format
-     if (!validateEmail(mail)) {
+    if (!validateEmail(mail)) {
       return res.status(400).send({ message: 'Invalid email format' });
     }
 
@@ -130,7 +126,6 @@ router.post('/signup', async (req, res) => {
     if (!isValidPassword(password)) {
       return res.status(400).send({ message: 'Password does not meet the criteria.' });
     }
-
 
     // Check if the username is already taken
     let existingUser = await User.findOne({ username });
@@ -142,10 +137,10 @@ router.post('/signup', async (req, res) => {
     const otp = generateOTP();
     const otpExpiry = Date.now() + 3600000; // OTP expires in 1 hour
 
-    // Create the new user with the hashed password, OTP, and OTP expiry
+    // Create the new user with the unhashed password, OTP, and OTP expiry
     const user = await User.create({
       username,
-      password: hash,
+      password,  // Pass the raw password, pre-save hook will handle hashing
       mail,
       otp,
       otpExpiry,
@@ -167,7 +162,6 @@ router.post('/signup', async (req, res) => {
     });
   }
 });
-
 // Route to verify OTP
 router.post('/verify-otp', async (req, res) => {
   const { username, otp } = req.body;
