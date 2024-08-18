@@ -93,14 +93,6 @@ const ProfilePage = () => {
     navigation.navigate("profile/settings");
   };
 
-  const handleFollowersPress = () => {
-    navigation.navigate("profile/followers");
-  };
-
-  const handleFollowingPress = () => {
-    navigation.navigate("profile/following");
-  };
-
   const handleListPress = (index) => {
     navigation.navigate("profile/lists", { listName: lists[index].name });
   };
@@ -252,22 +244,6 @@ const ProfilePage = () => {
             <Image source={selectedProfilePic} style={styles.profileImage} />
           </TouchableOpacity>
           <ThemedText type="title">{username}</ThemedText>
-          <View style={styles.statsContainer}>
-            <TouchableOpacity
-              style={styles.statItem}
-              onPress={handleFollowersPress}
-            >
-              <ThemedText style={styles.statNumber}>87.8K</ThemedText>
-              <ThemedText style={styles.statLabel}>Followers</ThemedText>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.statItem}
-              onPress={handleFollowingPress}
-            >
-              <ThemedText style={styles.statNumber}>526</ThemedText>
-              <ThemedText style={styles.statLabel}>Following</ThemedText>
-            </TouchableOpacity>
-          </View>
         </ThemedView>
       }
     >
@@ -510,7 +486,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   iconContainerMobile: {
-    top: 0,
+    top: 100,
   },
   iconContainerWeb: {
     bottom: 0,
@@ -522,8 +498,8 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
   },
   profileImage: {
-    width: 100,
-    height: 100,
+    width: 160,
+    height: 160,
     borderRadius: 75,
     borderColor: "#808080",
     borderWidth: 2,
