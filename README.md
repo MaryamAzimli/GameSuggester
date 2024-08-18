@@ -28,29 +28,28 @@ If you still have any problems accessing the app, feel free to email us at:
 
 
 In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
 - [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
 - [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
- 3. For backend, please open backend directory.
-   1. Configure the `BASE URL`
-      - Open the app.json file in the root of the project.
-      - Modify the following under the "extra" section:
-      ```json
-      "extra": {
-      "BASE_URL": "http://your-local-ip:3000"
-      }
-      ```
-      - Replace "http://your-local-ip:3000" with your local IP address. You can find your local IP address by running `ipconfig` on Windows or `ifconfig` on macOS/Linux.
+  
+
+## For backend:
+- Open the app.json file in the root of the project.
+- Modify the following under the "extra" section:
+ ```json
+ "extra": {
+ "BASE_URL": "http://your-local-ip:3000"
+ }
+ ```
+- Replace "http://your-local-ip:3000" with your local IP address.
+- You can find your local IP address by running `ipconfig` on Windows or `ifconfig` on macOS/Linux.
    
-   2. Start Server
-    ```bash
-      cd backend
-      npm i
-      node server.js
-    ```
+ - Start Server
+```bash
+cd backend
+npm i
+node server.js
+```
 In the output you will see:
 Starting server...
 Credentials loaded successfully
