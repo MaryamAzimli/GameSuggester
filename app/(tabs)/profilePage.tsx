@@ -33,14 +33,12 @@ import pirate from "@/assets/defaultProfiles/pirate.png";
 import superHero from "@/assets/defaultProfiles/superHero.png";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
 const ProfilePage = () => {
   const [selectedTab, setSelectedTab] = useState("Games");
   const [modalVisible, setModalVisible] = useState(false);
   const [listName, setListName] = useState("");
-  const [lists, setLists] = useState([
-    { name: "Shooters", games: 14, time: "1w" },
-  ]);
+  const [lists, setLists] = useState([{ name: "Shooters", games: 14, time: "1w" }]);
+  const [username, setUsername] = useState(""); // Add state for username
   const navigation = useNavigation();
   const isMobile = useMediaQuery({ maxWidth: 767 });
   const isWeb = useMediaQuery({ minWidth: 768 });
@@ -51,17 +49,21 @@ const ProfilePage = () => {
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteListIndex, setDeleteListIndex] = useState(null);
   const [profilePicModalVisible, setProfilePicModalVisible] = useState(false);
-  const [selectedProfilePic, setSelectedProfilePic] = useState(elf);
-  const route = useRoute();
-  const { username } = route.params || {};
+  const [selectedProfilePic, setSelectedProfilePic] = useState(alien);
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const user = await AsyncStorage.getItem('user');
-      if (user) {
-        setUsername(JSON.parse(user).username);
+      try {
+        const user = await AsyncStorage.getItem('user');
+        if (user) {
+          const parsedUser = JSON.parse(user);
+          setUsername(parsedUser.username); // Update state
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
       }
     };
+
     fetchUserData();
   }, []);
 

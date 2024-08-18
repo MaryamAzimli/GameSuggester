@@ -7,6 +7,27 @@ const User = require('../models/user');
 const router = express.Router();
 const jwtSecret = process.env.JWT_SECRET;
 
+// Middleware to authenticate using JWT
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  console.log("Token:", token);
+
+  if (token == null) return res.status(401).json({ message: 'Token not found' });
+
+  jwt.verify(token, jwtSecret, (err, user) => {
+    if (err) {
+      console.error("Token verification failed:", err);
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+    console.log("User from token:", user);
+    req.user = user;
+    next();
+  });
+}
+
+
 // Password validation
 function isValidPassword(password) {
   return password.length >= 6 &&
@@ -90,10 +111,13 @@ router.post('/check-username', async (req, res) => {
 
 // Signup Route
 router.post('/signup', async (req, res) => {
-  const { username, password, mail } = req.body;  // Include mail here
- 
+  const { username, password, mail } = req.body;
 
   try {
+    // Hash the password
+    const hash = await bcrypt.hash(password, 10);
+
+    // Generate OTP
     // Validate email format
      if (!validateEmail(mail)) {
       return res.status(400).send({ message: 'Invalid email format' });
@@ -115,20 +139,29 @@ router.post('/signup', async (req, res) => {
     const otp = generateOTP();
     const otpExpiry = Date.now() + 3600000; // OTP expires in 1 hour
 
-    const user = new User({ 
-      username, 
-      password, 
-      mail, 
-      otp,         
-      otpExpiry  
+    // Create the new user with the hashed password, OTP, and OTP expiry
+    const user = await User.create({
+      username,
+      password: hash,
+      mail,
+      otp,
+      otpExpiry,
     });
 
-    await user.save();
-
+    // Send OTP email
     await sendOTPEmail(user, otp, 'Verify your email', res);
+
+    res.status(201).json({
+      message: "User successfully created. Please verify your email using the OTP.",
+      userId: user._id,
+    });
+
   } catch (error) {
     console.error('Error during signup process:', error);
-    return res.status(400).json({ error: error.message });
+    res.status(400).json({
+      message: "User not successfully created",
+      error: error.message,
+    });
   }
 });
 
@@ -142,9 +175,6 @@ router.post('/verify-otp', async (req, res) => {
     if (!user) {
       return res.status(400).send({ message: 'User not found' });
     }
-
-    console.log(`Stored OTP: ${user.otp}, Provided OTP: ${otp}`); // Add logging
-
 
     if (user.otp !== otp) {
       return res.status(400).send({ message: 'Invalid OTP' });
@@ -196,7 +226,11 @@ router.post('/login', async (req, res) => {
     if (!user || !await bcrypt.compare(password, user.password)) {
       return res.status(401).json({ error: 'Authentication failed' });
     }
-    const token = jwt.sign({ id: user._id, username: user.username }, jwtSecret, { expiresIn: '1h' });
+    const token = jwt.sign(
+      { id: user._id, username: user.username },
+      jwtSecret,
+      { expiresIn: '1h' } // Set token to expire in 1 hour
+    );
     res.status(200).json({ message: 'Login successful', token, user: { id: user._id, username: user.username } });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -205,22 +239,20 @@ router.post('/login', async (req, res) => {
 
 // Logout Route
 router.post('/logout', (req, res) => {
-  const token = req.headers['authorization']?.split(' ')[1];
-
-  if (!token) {
-    return res.status(400).json({ message: 'No token provided' });
-  }
-
-  // Here, you can optionally handle token invalidation, like adding it to a blacklist
-  // For now, we'll just send a success message
-
+  // Invalidate the token on the client side
   res.status(200).json({ message: 'Logged out successfully' });
 });
 
 // Add a game to favorites
-router.post('/addFavorite', async (req, res) => {
-  const { userId, appid } = req.body;
+router.post('/addFavorite', authenticateToken, async (req, res) => {
+  const { appid } = req.body;
+  const userId = req.user.id; // Use userId from the token
+
   try {
+    if (!appid) {
+      return res.status(400).json({ error: 'Invalid appid' });
+    }
+
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -229,17 +261,24 @@ router.post('/addFavorite', async (req, res) => {
       user.favorites.push(appid);
       await user.save();
       res.status(200).json({ message: 'Game added to favorites', favorites: user.favorites });
+      console.log('Adding appid:', appid);
+      console.log('Current favorites:', user.favorites);
     } else {
       res.status(400).json({ error: 'Game already in favorites' });
     }
   } catch (error) {
+    console.error('Error adding favorite:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
+
+
 // Remove a game from favorites
-router.post('/removeFavorite', async (req, res) => {
-  const { userId, appid } = req.body;
+router.post('/removeFavorite', authenticateToken, async (req, res) => {
+  const { appid } = req.body;
+  const userId = req.user.id; // Use userId from the token
+
   try {
     const user = await User.findById(userId);
     if (!user) {
@@ -254,7 +293,7 @@ router.post('/removeFavorite', async (req, res) => {
 });
 
 // Get user's favorite games
-router.get('/favorites/:userId', async (req, res) => {
+router.get('/favorites/:userId', authenticateToken, async (req, res) => {
   try {
     const user = await User.findById(req.params.userId);
     if (!user) {
