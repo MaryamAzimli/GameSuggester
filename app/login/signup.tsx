@@ -93,7 +93,7 @@ const Signup = () => {
       strength = "Medium";
     }
     setPasswordStrength(strength);
-    setPasswordError(strength === "Weak" ? "Password strength is too weak." : "");
+    setPasswordError(strength === "Strong" ? "" : "Password strength is not strong enough.");
   };
 
   const suggestPassword = () => {
@@ -277,8 +277,10 @@ const Signup = () => {
                   <Text style={styles.suggestionLink}>Suggest a Password!</Text>
                 </TouchableOpacity>
                 {password ? (
-                  <Text style={styles.passwordStrength}>Password Strength: {passwordStrength}</Text>
-                ) : null}
+                <Text style={[styles.passwordStrength, (passwordStrength === "Weak" || passwordStrength === "Medium") && styles.weakOrMediumPassword]}>
+                  Password Strength: {passwordStrength}
+                </Text>
+              ) : null}
                 {suggestedPassword ? (
                   <View style={styles.suggestedPasswordContainer}>
                     <Text style={styles.suggestedPassword}>{suggestedPassword}</Text>
@@ -372,9 +374,11 @@ const Signup = () => {
                 </TouchableOpacity>
               </View>
             ) : null}
-            {password ? (
-              <Text style={styles.passwordStrength}>Password Strength: {passwordStrength}</Text>
-            ) : null}
+           {password ? (
+            <Text style={[styles.passwordStrength, (passwordStrength === "Weak" || passwordStrength === "Medium") && styles.weakOrMediumPassword]}>
+              Password Strength: {passwordStrength}
+            </Text>
+          ) : null}
           </View>
 
           <Button title="Signup" onPress={handleSignup} color={"#0F4C75"} />
@@ -496,7 +500,11 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     marginTop: 10,
   },
-  suggestionLink: {
+  weakOrMediumPassword: {
+    color: "red", 
+    marginTop: 10,
+  },
+    suggestionLink: {
     color: "#0F4C75",
     textAlign: "left",
     marginTop: 10,

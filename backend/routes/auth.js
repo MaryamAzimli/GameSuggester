@@ -8,20 +8,23 @@ const router = express.Router();
 const jwtSecret = process.env.JWT_SECRET;
 
 // Middleware to authenticate using JWT
+// Middleware to authenticate using JWT
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
-  console.log("Token:", token);
-
   if (token == null) return res.status(401).json({ message: 'Token not found' });
+
+  // Check if the token is blacklisted
+  if (tokenBlacklist.has(token)) {
+    return res.status(403).json({ message: 'Token is blacklisted' });
+  }
 
   jwt.verify(token, jwtSecret, (err, user) => {
     if (err) {
       console.error("Token verification failed:", err);
       return res.status(403).json({ message: 'Forbidden' });
     }
-    console.log("User from token:", user);
     req.user = user;
     next();
   });
@@ -238,8 +241,11 @@ router.post('/login', async (req, res) => {
 });
 
 // Logout Route
-router.post('/logout', (req, res) => {
-  // Invalidate the token on the client side
+const tokenBlacklist = new Set();
+
+router.post('/logout', authenticateToken, (req, res) => {
+  const token = req.headers['authorization'].split(' ')[1];
+  tokenBlacklist.add(token);  // Add the token to the blacklist
   res.status(200).json({ message: 'Logged out successfully' });
 });
 
