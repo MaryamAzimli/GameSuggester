@@ -47,15 +47,25 @@ const Settings = () => {
   const navigation = useNavigation();
   const handleLogout = async () => {
     try {
-      // Clear stored user data
       await AsyncStorage.removeItem('user');
-      
-      // Navigate to login screen
+      await AsyncStorage.removeItem('userId');
+      await AsyncStorage.removeItem('token');
+  
+      // Debugging to ensure data is cleared
+      const userId = await AsyncStorage.getItem('userId');
+      const token = await AsyncStorage.getItem('token');
+      console.log('User ID after logout:', userId); // Should be null
+      console.log('Token after logout:', token); // Should be null
+  
+      setFavoriteGames([]);
+      setUsername("");
+  
       navigation.navigate('login/login');
     } catch (error) {
       console.error('Failed to log out:', error);
     }
   };
+  
   
   const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
   const [aboutModalVisible, setAboutModalVisible] = useState(false);

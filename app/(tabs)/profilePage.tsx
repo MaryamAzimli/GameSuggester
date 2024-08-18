@@ -182,38 +182,41 @@ const ProfilePage = () => {
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
 const [favoriteGames, setFavoriteGames] = useState([]);
 const [loading, setLoading] = useState(true);
-
-useEffect(() => {
-  const fetchFavorites = async () => {
-    try {
-      const userId = await AsyncStorage.getItem('userId');
-      const token = await AsyncStorage.getItem('token');
-
-      if (userId && token) {
+ useEffect(() => {
+    const fetchFavorites = async () => {
+      try {
+        const userId = await AsyncStorage.getItem('userId');
+        const token = await AsyncStorage.getItem('token');
+  
+        // If userId or token is missing, clear favorites and return early
+        if (!userId || !token) {
+          setFavoriteGames([]); // Clear favorites if not logged in
+          return;
+        }
+        console.log(userId);
+  
         const response = await fetch(`${BASE_URL}/api/auth/favorites/${userId}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
         });
-
+  
         if (!response.ok) {
           throw new Error('Failed to fetch favorites');
         }
-
+  
         const data = await response.json();
         setFavoriteIds(data.favorites);
         console.log('Favorite IDs:', data.favorites);
-      } else {
-        Alert.alert('Error', 'User ID or Token not found');
+      } catch (error) {
+        console.error('Error fetching favorites:', error);
+        setFavoriteGames([]); // Set the favorites list to empty on error
       }
-    } catch (error) {
-      console.error('Error fetching favorites:', error);
-      Alert.alert('Error', 'Failed to load favorites');
-    }
-  };
-
-  fetchFavorites();
-}, []);
+    };
+  
+    fetchFavorites();
+  }, []);
+  
 
 useEffect(() => {
   const fetchGameById = async (id) => {
