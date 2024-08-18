@@ -1,24 +1,26 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { StyleSheet, View, ScrollView, Image, TouchableOpacity, Button, Alert } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
+import GameContext from '../GameContext'; 
 
 const { BASE_URL } = Constants.expoConfig?.extra || {};
 
 const Lists = () => {
-  const [favorites, setFavorites] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-
+  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
+  const { games, loading } = useContext(GameContext);
+  console.log(games);
   useEffect(() => {
+    
     const fetchFavorites = async () => {
       try {
         const userId = await AsyncStorage.getItem('userId');
         const token = await AsyncStorage.getItem('token');
         
         if (userId && token) {
-          const response = await fetch(`${BASE_URL}/api/favorites/${userId}`, {
+          const response = await fetch(`${BASE_URL}/api/auth/favorites/${userId}`, {
             headers: {
               'Authorization': `Bearer ${token}`,
             },
@@ -29,7 +31,7 @@ const Lists = () => {
           }
 
           const data = await response.json();
-          setFavorites(data.favorites);
+          setFavoriteIds(data.favorites);
         } else {
           Alert.alert('Error', 'User ID or Token not found');
         }
@@ -44,37 +46,8 @@ const Lists = () => {
     fetchFavorites();
   }, []);
 
-  const handleAddFavorite = async (appid: string) => {
-    try {
-      const token = await AsyncStorage.getItem('token');
-      const userId = await AsyncStorage.getItem('userId');
-
-      if (token && userId) {
-        const response = await fetch(`${BASE_URL}/api/addFavorite`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ userId, appid }),
-        });
-
-        const data = await response.json();
-
-        if (response.ok && data.message === 'Game added to favorites') {
-          setFavorites(prevFavorites => [...prevFavorites, appid]);
-        } else {
-          console.error(data.error);
-          Alert.alert('Error', data.error || 'Failed to add game to favorites');
-        }
-      } else {
-        Alert.alert('Error', 'No token or user ID found');
-      }
-    } catch (error) {
-      console.error('Error adding game to favorites:', error);
-      Alert.alert('Error', 'Failed to add game to favorites');
-    }
-  };
+  // Filter games based on favorite IDs
+  const favoriteGames = games?.filter(game => favoriteIds.includes(game.id)) || [];
 
   if (loading) {
     return <ThemedText>Loading...</ThemedText>;
@@ -83,11 +56,21 @@ const Lists = () => {
   return (
     <ThemedView style={styles.container}>
       <ScrollView contentContainerStyle={styles.contentContainer}>
-        {favorites.length > 0 ? (
-          favorites.map((appid, index) => (
+        {favoriteGames.length > 0 ? (
+          favoriteGames.map((game, index) => (
             <TouchableOpacity key={index} style={styles.gameCard}>
-              <Image source={{ uri: `https://example.com/games/${appid}/image.png` }} style={styles.gameImage} />
-              <ThemedText>{appid}</ThemedText>
+              <Image source={{ uri: game.header_image }} style={styles.gameImage} />
+              <View style={styles.gameInfo}>
+                <ThemedText style={styles.gameTitle} numberOfLines={1} ellipsizeMode="tail">
+                  {game.name}
+                </ThemedText>
+                <ThemedText style={styles.gameReviews} numberOfLines={2} ellipsizeMode="tail">
+                  Reviews: {game.reviews || "No reviews yet"}
+                </ThemedText>
+                <ThemedText style={styles.gameDeveloper} numberOfLines={1} ellipsizeMode="tail">
+                  Developer: {game.developers.join(", ")}
+                </ThemedText>
+              </View>
             </TouchableOpacity>
           ))
         ) : (
@@ -120,5 +103,20 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 10,
     marginBottom: 10,
+  },
+  gameInfo: {
+    alignItems: 'center',
+  },
+  gameTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  gameReviews: {
+    fontSize: 14,
+    color: 'gray',
+  },
+  gameDeveloper: {
+    fontSize: 14,
+    color: 'gray',
   },
 });

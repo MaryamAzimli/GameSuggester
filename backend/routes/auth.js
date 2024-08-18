@@ -181,6 +181,10 @@ router.post('/addFavorite', authenticateToken, async (req, res) => {
   const userId = req.user.id; // Use userId from the token
 
   try {
+    if (!appid) {
+      return res.status(400).json({ error: 'Invalid appid' });
+    }
+
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -189,13 +193,18 @@ router.post('/addFavorite', authenticateToken, async (req, res) => {
       user.favorites.push(appid);
       await user.save();
       res.status(200).json({ message: 'Game added to favorites', favorites: user.favorites });
+      console.log('Adding appid:', appid);
+      console.log('Current favorites:', user.favorites);
     } else {
       res.status(400).json({ error: 'Game already in favorites' });
     }
   } catch (error) {
+    console.error('Error adding favorite:', error);
     res.status(500).json({ error: error.message });
   }
 });
+
+
 
 // Remove a game from favorites
 router.post('/removeFavorite', authenticateToken, async (req, res) => {

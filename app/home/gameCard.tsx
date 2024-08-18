@@ -40,17 +40,13 @@ const GameCard = () => {
   const [loading, setLoading] = useState(false); // Loading of suggest similar
   const initialTagColor = "transparent";
   const navigation = useNavigation();
-
   const handleLikeToggle = async () => {
     try {
+      console.log('Game object:', game); // Log the game object to verify its contents
+
       const token = await AsyncStorage.getItem('token');
-      const userId = await AsyncStorage.getItem('userId');
   
-      // Debugging information
-      console.log('Token:', token);
-      console.log('User ID:', userId);
-  
-      if (!token || !userId) {
+      if (!token) {
         Alert.alert('You need to be logged in to like a game.');
         return;
       }
@@ -58,36 +54,34 @@ const GameCard = () => {
       setLiked((prevLiked) => !prevLiked);
   
       const url = liked ? '/removeFavorite' : '/addFavorite';
-      const method = 'POST';
-  
-      const response = await fetch(`${BASE_URL}${url}`, {
-        method: method,
+      const response = await fetch(`${BASE_URL}/api/auth/${url}`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ userId, appid: game.appid }),
+        body: JSON.stringify({ appid: game.id}), // Ensure game.appid is valid
       });
+      console.log(game.id);
   
       const data = await response.json();
   
-      // Debugging information
-      console.log('Response:', data);
-  
-      if (!response.ok || data.error) {
-        console.error('Error:', data.error);
-        Alert.alert('Error', data.error || 'Failed to update favorites');
-      } else {
-        const message = liked
-          ? `${game.name} is removed from your favorites library`
-          : `${game.name} is added to your favorites library`;
-        Alert.alert(message);
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update favorites');
       }
+  
+      const message = liked
+        ? `${game.name} is removed from your favorites library`
+        : `${game.name} is added to your favorites library`;
+      Alert.alert(message);
     } catch (error) {
       console.error('Error:', error);
-      Alert.alert('Error', 'Failed to update favorites. Please try again.');
+      Alert.alert('Error', error.message || 'Failed to update favorites. Please try again.');
     }
+    
   };
+  
+  
   
 
   const handleTagClick = (tag) => {

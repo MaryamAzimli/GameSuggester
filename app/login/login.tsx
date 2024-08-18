@@ -26,7 +26,7 @@ const Login = () => {
     }
   
     try {
-      const response = await fetch(`${BASE_URL}/api/auth/login`, { // Use BASE_URL from app.json
+      const response = await fetch(`${BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -41,8 +41,11 @@ const Login = () => {
   
       const data = await response.json();
       console.log("Login successful:", data);
+  
       await AsyncStorage.setItem('token', data.token);
+      await AsyncStorage.setItem('userId', data.user.id); // Store the user ID
       await AsyncStorage.setItem('user', JSON.stringify(data.user));
+  
       alert("Login successful");
       navigation.navigate("profilePage", { username });
     } catch (error) {
@@ -50,6 +53,7 @@ const Login = () => {
       alert("Login failed: " + error.message);
     }
   };
+  
 
   const platform = () => {
     if(Platform.OS === "android" || Platform.OS === "ios"){

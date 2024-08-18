@@ -1,5 +1,5 @@
 export interface Game {
-  appid: string;
+  id: string;
   name: string;
   release_date: string;
   required_age: number;

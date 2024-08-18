@@ -41,7 +41,7 @@ export default function HomeScreen() {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const limit = 5;
-
+//console.log(games);
   useEffect(() => {
     setPage(1); // Reset to first page whenever the query changes
   }, [query]);
