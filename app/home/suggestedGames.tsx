@@ -15,6 +15,7 @@ import LottieView from "lottie-react-native";
 import Entypo from "@expo/vector-icons/Entypo";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Constants from 'expo-constants';
+import { Video } from "expo-av";
 
 const { BASE_URL } = Constants.expoConfig?.extra || {};
 console.log('BASE_URL:', BASE_URL);
@@ -154,6 +155,7 @@ const SuggestedGamesPage = () => {
               id: data.id,
               name: data.name,
               image: data.header_image || "/assets/defaultProfiles/default.png",
+              movies: data.movies,
             }))
         );
         const fetchedGames = await Promise.all(gamePromises);
@@ -214,6 +216,16 @@ const SuggestedGamesPage = () => {
 
             {showDetails && (
               <>
+                <View style={styles.gameImage}>
+                  {game.movies.length > 0 && (
+                    <Video
+                      source={{ uri: game.movies[0] }}
+                      useNativeControls
+                      resizeMode="contain"
+                      style={styles.video}
+                    />
+                  )}
+                </View>
                 <ThemedText style={styles.gameDescription}>
                   Detailed information about {game.name}.
                 </ThemedText>
@@ -377,5 +389,10 @@ const styles = StyleSheet.create({
     color: "black",
     textAlign: "center",
     marginTop: 10,
+  },
+  video: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 8,
   },
 });
