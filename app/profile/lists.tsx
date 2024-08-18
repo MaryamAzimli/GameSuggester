@@ -1,43 +1,80 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, ScrollView, Image, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, ScrollView, Image, TouchableOpacity, Button, Alert } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Constants from 'expo-constants'; // Import Constants
+import Constants from 'expo-constants';
 
-const { BASE_URL } = Constants.expoConfig?.extra || {}; // Access BASE_URL from app.json
+const { BASE_URL } = Constants.expoConfig?.extra || {};
 
 const Lists = () => {
-  const [favorites, setFavorites] = useState([]);
+  const [favorites, setFavorites] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchFavorites = async () => {
-      const userId = await AsyncStorage.getItem('userId');
-      const token = await AsyncStorage.getItem('token');
-      
-      if (userId && token) {
-        fetch(`${BASE_URL}/api/favorites/${userId}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        })
-          .then(response => response.json())
-          .then(data => {
-            setFavorites(data.favorites);
-            setLoading(false);
-          })
-          .catch(error => {
-            console.error('Error fetching favorites:', error);
-            setLoading(false);
+      try {
+        const userId = await AsyncStorage.getItem('userId');
+        const token = await AsyncStorage.getItem('token');
+        
+        if (userId && token) {
+          const response = await fetch(`${BASE_URL}/api/favorites/${userId}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
           });
-      } else {
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch favorites');
+          }
+
+          const data = await response.json();
+          setFavorites(data.favorites);
+        } else {
+          Alert.alert('Error', 'User ID or Token not found');
+        }
+      } catch (error) {
+        console.error('Error fetching favorites:', error);
+        Alert.alert('Error', 'Failed to load favorites');
+      } finally {
         setLoading(false);
       }
     };
 
     fetchFavorites();
   }, []);
+
+  const handleAddFavorite = async (appid: string) => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const userId = await AsyncStorage.getItem('userId');
+
+      if (token && userId) {
+        const response = await fetch(`${BASE_URL}/api/addFavorite`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userId, appid }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.message === 'Game added to favorites') {
+          setFavorites(prevFavorites => [...prevFavorites, appid]);
+        } else {
+          console.error(data.error);
+          Alert.alert('Error', data.error || 'Failed to add game to favorites');
+        }
+      } else {
+        Alert.alert('Error', 'No token or user ID found');
+      }
+    } catch (error) {
+      console.error('Error adding game to favorites:', error);
+      Alert.alert('Error', 'Failed to add game to favorites');
+    }
+  };
 
   if (loading) {
     return <ThemedText>Loading...</ThemedText>;
@@ -56,6 +93,7 @@ const Lists = () => {
         ) : (
           <ThemedText>No favorite games added yet.</ThemedText>
         )}
+        <Button title="Add Game" onPress={() => handleAddFavorite('new-game-appid')} />
       </ScrollView>
     </ThemedView>
   );

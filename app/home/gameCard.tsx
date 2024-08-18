@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Platform,
   Alert,
-  Text,
   ActivityIndicator,
 } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
@@ -20,10 +19,9 @@ import Entypo from "@expo/vector-icons/Entypo";
 import { Button } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 
-{
-  /*import LottieView from "lottie-react-native";*/
-}
+const { BASE_URL } = Constants.expoConfig?.extra || {};
 
 type RootStackParamList = {
   home: undefined;
@@ -43,80 +41,54 @@ const GameCard = () => {
   const initialTagColor = "transparent";
   const navigation = useNavigation();
 
-  {
-    /*let devAnimation;*/
-  }
-
-  {
-    /*const handleSuggestSimilar = () => {
-    devAnimation.play();
-  };*/
-  }
-
-  /* const handleLikeToggle = () => {
-    setLiked((prevLiked) => {
-      const newLiked = !prevLiked;
-      const message = newLiked
-        ? `${game.name} is added to your favorites library`
-        : `${game.name} is removed from your favorites library`;
-
-      if (Platform.OS === "web") {
-        alert(message);
+  const handleLikeToggle = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const userId = await AsyncStorage.getItem('userId');
+  
+      // Debugging information
+      console.log('Token:', token);
+      console.log('User ID:', userId);
+  
+      if (!token || !userId) {
+        Alert.alert('You need to be logged in to like a game.');
+        return;
+      }
+  
+      setLiked((prevLiked) => !prevLiked);
+  
+      const url = liked ? '/removeFavorite' : '/addFavorite';
+      const method = 'POST';
+  
+      const response = await fetch(`${BASE_URL}${url}`, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ userId, appid: game.appid }),
+      });
+  
+      const data = await response.json();
+  
+      // Debugging information
+      console.log('Response:', data);
+  
+      if (!response.ok || data.error) {
+        console.error('Error:', data.error);
+        Alert.alert('Error', data.error || 'Failed to update favorites');
       } else {
+        const message = liked
+          ? `${game.name} is removed from your favorites library`
+          : `${game.name} is added to your favorites library`;
         Alert.alert(message);
       }
-      return newLiked;
-    });
-  }; */
-
-  const handleLikeToggle = async () => {
-    const token = await AsyncStorage.getItem('token');
-    const userId = await AsyncStorage.getItem('userId'); // Assuming you store this during login
-    if (!token || !userId) {
-      // Handle the case where the user is not logged in
-      Alert.alert('You need to be logged in to like a game.');
-      return;
+    } catch (error) {
+      console.error('Error:', error);
+      Alert.alert('Error', 'Failed to update favorites. Please try again.');
     }
-  
-    setLiked((prevLiked) => !prevLiked);
-  
-    const url = liked ? '/removeFavorite' : '/addFavorite';
-    const method = liked ? 'POST' : 'POST';
-  
-    fetch(`http://yourbackendurl.com${url}`, {
-      method: method,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({ userId, appid: game.appid }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.error) {
-          console.error('Error:', data.error);
-          Alert.alert('Error', data.error);
-        } else {
-          const message = liked
-            ? `${game.name} is removed from your favorites library`
-            : `${game.name} is added to your favorites library`;
-          Alert.alert(message);
-        }
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-        Alert.alert('Error', 'Failed to update favorites. Please try again.');
-      });
   };
-
-  const getRandomColor = () => {
-    const letters = "0123456789ABCDEF";
-    let color = "#";
-    for (let i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-  };
+  
 
   const handleTagClick = (tag) => {
     if (Array.isArray(game.clean_tags) && game.clean_tags.length > 0) {
@@ -130,7 +102,7 @@ const GameCard = () => {
     }
   };
 
-  const handleSuggestClick = () => {
+  const handleSuggestClick = async () => {
     if (loading) return; // Prevent multiple requests
 
     const selectedTags = Object.keys(tagColors).filter(
@@ -151,40 +123,34 @@ const GameCard = () => {
 
     setLoading(true); // Start loading
 
-    fetch("https://ep4js2tqr3bhiy3m3xoqyydkim0qrvvg.lambda-url.eu-west-2.on.aws/suggestions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      mode: "cors",
-      body: JSON.stringify(payload),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Success:", data);
-        const appids = data.suggestions.map((item) => item.appid);
-        navigation.navigate("home/suggestedGames", { appids });
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        Alert.alert("Error", "Failed to fetch suggestions. Please try again.");
-      })
-      .finally(() => {
-        setLoading(false); // Stop loading
+    try {
+      const response = await fetch("https://ep4js2tqr3bhiy3m3xoqyydkim0qrvvg.lambda-url.eu-west-2.on.aws/suggestions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
       });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch suggestions');
+      }
+
+      const appids = data.suggestions.map((item) => item.appid);
+      navigation.navigate("home/suggestedGames", { appids });
+    } catch (error) {
+      console.error("Error:", error);
+      Alert.alert("Error", "Failed to fetch suggestions. Please try again.");
+    } finally {
+      setLoading(false); // Stop loading
+    }
   };
 
   return (
     <ThemedView style={styles.container}>
       <View style={styles.innerContainer}>
-        {/*<LottieView
-          ref={(animation) => {
-            devAnimation = animation;
-          }}
-          source={require("@/assets/animations/suggestSimilar.json")}
-          autoPlay={false}
-          loop={true}
-        />*/}
         <ScrollView contentContainerStyle={styles.contentContainer}>
           <Image source={{ uri: game.header_image }} style={styles.gameImage} />
           <View style={styles.titleContainer}>
@@ -322,7 +288,7 @@ const GameCard = () => {
             end={{ x: 1, y: 1 }}
             style={styles.gradient}
           >
-           {loading ? (
+            {loading ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
               <ThemedText style={styles.suggestButtonText}>
