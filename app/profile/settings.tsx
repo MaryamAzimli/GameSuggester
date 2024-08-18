@@ -57,9 +57,6 @@ const Settings = () => {
       console.log('User ID after logout:', userId); // Should be null
       console.log('Token after logout:', token); // Should be null
   
-      setFavoriteGames([]);
-      setUsername("");
-  
       navigation.navigate('login/login');
     } catch (error) {
       console.error('Failed to log out:', error);
