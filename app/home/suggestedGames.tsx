@@ -15,6 +15,7 @@ import LottieView from "lottie-react-native";
 import Entypo from "@expo/vector-icons/Entypo";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Constants from 'expo-constants';
+import { Video } from "expo-av";  
 
 const { BASE_URL } = Constants.expoConfig?.extra || {};
 console.log('BASE_URL:', BASE_URL);
@@ -154,6 +155,7 @@ const SuggestedGamesPage = () => {
               id: data.id,
               name: data.name,
               image: data.header_image || "/assets/defaultProfiles/default.png",
+              movies: data.movies,
             }))
         );
         const fetchedGames = await Promise.all(gamePromises);
