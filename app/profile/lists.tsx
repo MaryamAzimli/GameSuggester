@@ -10,10 +10,12 @@ const { BASE_URL } = Constants.expoConfig?.extra || {};
 
 const Lists = () => {
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
-  const { games, loading } = useContext(GameContext);
-  console.log(games);
+  const [favoriteGames, setFavoriteGames] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  
+  // console.log(games);
   useEffect(() => {
-    
     const fetchFavorites = async () => {
       try {
         const userId = await AsyncStorage.getItem('userId');
@@ -32,22 +34,48 @@ const Lists = () => {
 
           const data = await response.json();
           setFavoriteIds(data.favorites);
+          console.log('Favorite IDs:', data.favorites);
         } else {
           Alert.alert('Error', 'User ID or Token not found');
         }
       } catch (error) {
         console.error('Error fetching favorites:', error);
         Alert.alert('Error', 'Failed to load favorites');
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchFavorites();
-  }, []);
+  }, []); // Empty dependency array to run only once
 
-  // Filter games based on favorite IDs
-  const favoriteGames = games?.filter(game => favoriteIds.includes(game.id)) || [];
+  useEffect(() => {
+    const fetchGameById = async (id) => {
+      try {
+        const response = await fetch(`${BASE_URL}/api/games/${id}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch game with id ${id}`);
+        }
+        const gameData = await response.json();
+        return gameData;
+      } catch (error) {
+        console.error('Error fetching game:', error);
+        Alert.alert('Error', `Failed to load game with id ${id}`);
+        return null;
+      }
+    };
+
+    const fetchFavoriteGames = async () => {
+      if (favoriteIds.length > 0) {
+        const gamePromises = favoriteIds.map(id => fetchGameById(id));
+        const games = await Promise.all(gamePromises);
+        setFavoriteGames(games.filter(game => game !== null));
+        setLoading(false);
+      } else {
+        setLoading(false);
+      }
+    };
+
+    fetchFavoriteGames();
+  }, [favoriteIds]); // Runs whenever favoriteIds is updated
 
   if (loading) {
     return <ThemedText>Loading...</ThemedText>;
