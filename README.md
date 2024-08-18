@@ -61,6 +61,10 @@ Credentials loaded successfully
 For now the data is correctly fetched and shown on web but not on app itself. It takes sometime for fetched 3 games to be shown in the home page.
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
+## Additional information
+- The "Get Suggestions" functionality may take approximately 1 minute and 45 seconds to complete. This duration is due to the time required to fetch and process the data needed to generate game suggestions. Please be patient while the system generates your recommendations.
+- If you notice that changes are not being reflected immediately, you may need to reload the application by pressing `r`.
+
 ## Get a fresh project
 
 When you're ready, run:
