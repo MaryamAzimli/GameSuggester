@@ -22,6 +22,11 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 - If the QR code is not accessible, download the [Expo Go](https://expo.dev/go) app from the [Google Play Store](https://play.google.com/store/apps/details?id=host.exp.exponent&hl=en&pli=1) or [Apple App Store](https://apps.apple.com/us/app/expo-go/id982107779).
 - Open Expo Go and enter the URL shown in the terminal or DevTools manually.
 
+- 1. In case above mentioned does not work for you, please enable developer options.
+  2. Click on it and enable USB debugging.
+  3. After expo has started and shows several choices press on 'a' for android. The first time you might need to give permission and the press 'a' again.
+  4. If expo go is not downloaded it will start downloading and soon the app will automatically open on your phone
+
 If you still have any problems accessing the app, feel free to email us at:
 - [gamesuggester24@gmail.com](mailto:gamesuggester24@gmail.com)
 - [gamesuggester24@hotmail.com](mailto:gamesuggester24@hotmail.com)
